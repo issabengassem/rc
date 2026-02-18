@@ -1,0 +1,17 @@
+package com.example.backend.repositories;
+
+import com.example.backend.entities.Salon;
+import com.example.backend.entities.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface SalonRepository extends JpaRepository<Salon, Long> {
+
+    List<Salon> findByCity(String city);
+
+    List<Salon> findByOwner(User owner);
+
+    List<Salon> findByNameContainingIgnoreCase(String name);
+}
