@@ -10,6 +10,7 @@ import com.example.backend.repositories.SalonRepository;
 import com.example.backend.repositories.ServiceRepository;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -105,6 +106,23 @@ public class AppointmentService {
 
     public List<AppointmentDTO> getAppointmentsByStatus(Appointment.AppointmentStatus status) {
         return appointmentRepository.findByStatus(status).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<AppointmentDTO> getAppointmentsByService(Long serviceId) {
+        return appointmentRepository.findByServiceId(serviceId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<AppointmentDTO> getAppointmentsByServiceAndDate(Long serviceId, String date) {
+        // Parse date string (YYYY-MM-DD) and convert to LocalDateTime for start and end of day
+        LocalDate localDate = LocalDate.parse(date);
+        LocalDateTime startOfDay = localDate.atStartOfDay();
+        LocalDateTime endOfDay = localDate.atTime(23, 59, 59);
+        
+        return appointmentRepository.findByServiceIdAndDateRange(serviceId, startOfDay, endOfDay).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }

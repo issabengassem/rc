@@ -36,4 +36,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("clientId") Long clientId,
             @Param("status") Appointment.AppointmentStatus status
     );
+
+    // Find appointments by service ID
+    List<Appointment> findByServiceId(Long serviceId);
+
+    // Find appointments by service ID and date range
+    @Query("SELECT a FROM Appointment a WHERE a.service.id = :serviceId " +
+            "AND a.appointmentDateTime BETWEEN :startDate AND :endDate")
+    List<Appointment> findByServiceIdAndDateRange(
+            @Param("serviceId") Long serviceId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }

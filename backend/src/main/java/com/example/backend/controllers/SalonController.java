@@ -91,6 +91,14 @@ public class SalonController {
         return ResponseEntity.ok(salonService.searchSalonsByName(name));
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<SalonDTO>> filterSalons(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long serviceId,
+            @RequestParam(required = false) String city) {
+        return ResponseEntity.ok(salonService.filterSalons(name, serviceId, city));
+    }
+
     @PostMapping("/{id}/upload-image")
     public ResponseEntity<SalonDTO> uploadSalonImage(
             @PathVariable Long id,

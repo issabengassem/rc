@@ -239,6 +239,25 @@ export const salonService = {
     return handleResponse(response);
   },
 
+  // Filter salons with multiple criteria
+  filterSalons: async (filters = {}) => {
+    const params = new URLSearchParams();
+
+    if (filters.name) params.append("name", filters.name);
+    if (filters.serviceId) params.append("serviceId", filters.serviceId);
+    if (filters.city) params.append("city", filters.city);
+
+    const queryString = params.toString();
+    const url = queryString
+      ? `${API_BASE_URL}/salons/filter?${queryString}`
+      : `${API_BASE_URL}/salons`;
+
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   // Upload salon image separately
   uploadSalonImage: async (salonId, imageFile) => {
     const formData = new FormData();
@@ -491,6 +510,18 @@ export const appointmentService = {
         headers: getAuthHeaders(),
       },
     );
+    return handleResponse(response);
+  },
+
+  // Get appointments by service (optionally filtered by date)
+  getAppointmentsByService: async (serviceId, date = null) => {
+    let url = `${API_BASE_URL}/appointments/service/${serviceId}`;
+    if (date) {
+      url += `?date=${date}`;
+    }
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
     return handleResponse(response);
   },
 };

@@ -24,15 +24,25 @@ public class JwtFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // Skip JWT filter for public endpoints
+        return path.startsWith("/api/users/register") ||
+               path.startsWith("/api/users/login") ||
+               path.startsWith("/api/files/") ||
+               path.startsWith("/api/salons/") ||
+               path.startsWith("/api/reviews/salon/") ||
+               path.startsWith("/api/reviews/check/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("JWT FILTER HIT 1: " + request.getRequestURI());
         String authHeader = request.getHeader("Authorization");
 
         String token = null;
         String username = null;
         if(authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            System.out.println(token);
             username = jwtService.getEmailFrom(token);
         }
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

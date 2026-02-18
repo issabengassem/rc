@@ -108,23 +108,18 @@ const BookAppointment = () => {
 
     setLoadingSlots(true);
     try {
-      const allAppointments =
-        await appointmentService.getAppointmentsBySalon(salonId);
+      // Use the new service-specific endpoint
+      // This returns ONLY reservations for the selected service on the selected date
+      const serviceReservations =
+        await appointmentService.getAppointmentsByService(serviceId, date);
 
-      // Filter appointments for the selected date AND service
-      const serviceReservations = allAppointments.filter((apt) => {
-        const aptDate = apt.appointmentDateTime.split("T")[0];
-        const aptServiceId = apt.service?.id || apt.serviceId;
-        return (
-          aptDate === date &&
-          aptServiceId === parseInt(serviceId) &&
-          apt.status !== "CANCELLED" &&
-          apt.status !== "REJECTED"
-        );
-      });
+      // Filter out cancelled/rejected appointments
+      const activeReservations = serviceReservations.filter(
+        (apt) => apt.status !== "CANCELLED" && apt.status !== "REJECTED",
+      );
 
       // Transform to include service duration
-      const reservationsWithDuration = serviceReservations.map((apt) => ({
+      const reservationsWithDuration = activeReservations.map((apt) => ({
         ...apt,
         serviceDuration: apt.service?.durationMinutes || 60,
       }));
@@ -151,18 +146,21 @@ const BookAppointment = () => {
   // Check if the selected date/time slot is already booked for this service
   const checkAvailability = async (dateTime, serviceId) => {
     try {
-      // Fetch all appointments for this salon
-      const appointments =
-        await appointmentService.getAppointmentsBySalon(salonId);
+      // Extract date from datetime
+      const date = dateTime.split("T")[0];
 
-      // Check if any appointment has the same date/time AND same service
+      // Fetch appointments for this specific service on this date
+      const appointments = await appointmentService.getAppointmentsByService(
+        serviceId,
+        date,
+      );
+
+      // Check if any appointment has the same date/time for this service
       const isBooked = appointments.some((apt) => {
-        const aptServiceId = apt.service?.id || apt.serviceId;
         const aptDateTime = apt.appointmentDateTime.substring(0, 16); // "2026-02-20T14:30"
         const selectedDateTime = dateTime.substring(0, 16);
 
         return (
-          aptServiceId === parseInt(serviceId) &&
           aptDateTime === selectedDateTime &&
           apt.status !== "CANCELLED" &&
           apt.status !== "REJECTED"
@@ -374,8 +372,8 @@ const BookAppointment = () => {
               <div>
                 <TimeSlotGrid
                   selectedDate={formData.appointmentDate}
-                  salonOpenTime={salon.openingHour || "09:00"}
-                  salonCloseTime={salon.closingHour || "18:00"}
+                  salonOpenTime={salon.openingTime || "09:00"}
+                  salonCloseTime={salon.closingTime || "18:00"}
                   reservations={reservations}
                   onSlotSelect={handleSlotSelect}
                   selectedSlot={selectedTimeSlot}

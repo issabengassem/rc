@@ -5,6 +5,11 @@
 
 /**
  * Generate time slots for a given date based on salon working hours
+ *
+ * BUSINESS RULE:
+ * Slots are generated from salon opening time to (closing time - service duration)
+ * This ensures the service can be completed before the salon closes.
+ *
  * @param {string} date - Date in YYYY-MM-DD format
  * @param {string} openTime - Opening time in HH:mm format (e.g., "09:00")
  * @param {string} closeTime - Closing time in HH:mm format (e.g., "18:00")
@@ -28,8 +33,9 @@ export const generateTimeSlots = (
   const endTime = new Date(`${date}T${closeTime}:00`);
 
   // Calculate the last valid booking time
-  // Last slot = closingTime - serviceDuration
+  // CRITICAL: Last slot = closingTime - serviceDuration
   // This ensures service can complete before salon closes
+  // Example: If salon closes at 18:00 and service is 90 min, last slot is 16:30
   const lastValidBookingTime =
     serviceDuration > 0
       ? new Date(endTime.getTime() - serviceDuration * 60000)
@@ -96,8 +102,13 @@ export const isSlotBlocked = (
 
 /**
  * Calculate availability for all time slots
+ *
+ * BUSINESS RULE:
+ * A slot is marked as RESERVED only if there's a reservation for the SAME service
+ * that overlaps with this time slot. Reservations for OTHER services do NOT block slots.
+ *
  * @param {Array} slots - Array of time slot objects
- * @param {Array} reservations - Array of reservation objects with startTime and serviceDuration
+ * @param {Array} reservations - Array of reservation objects (ALREADY FILTERED by service)
  * @param {number} slotDuration - Duration of each slot in minutes
  * @returns {Array} Slots with availability status
  */
@@ -108,6 +119,7 @@ export const calculateSlotAvailability = (
 ) => {
   return slots.map((slot) => {
     // Check if this slot is blocked by any reservation
+    // NOTE: reservations array should already be filtered for the selected service
     const isBlocked = reservations.some((reservation) => {
       // Handle different possible field names from backend
       const resStart = reservation.appointmentDateTime || reservation.startTime;

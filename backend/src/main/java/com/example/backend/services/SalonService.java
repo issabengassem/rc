@@ -133,6 +133,37 @@ public class SalonService {
                 .collect(Collectors.toList());
     }
 
+    public List<SalonDTO> filterSalons(String name, Long serviceId, String city) {
+        List<Salon> salons;
+
+        // Apply filters based on what's provided
+        if (serviceId != null && city != null && !city.isEmpty()) {
+            // Filter by both service and city
+            salons = salonRepository.findByServiceIdAndCity(serviceId, city);
+        } else if (serviceId != null) {
+            // Filter by service only
+            salons = salonRepository.findByServiceId(serviceId);
+        } else if (city != null && !city.isEmpty()) {
+            // Filter by city only
+            salons = salonRepository.findByCity(city);
+        } else {
+            // No service or city filter, get all
+            salons = salonRepository.findAll();
+        }
+
+        // Apply name filter if provided
+        if (name != null && !name.isEmpty()) {
+            String lowerName = name.toLowerCase();
+            salons = salons.stream()
+                    .filter(s -> s.getName().toLowerCase().contains(lowerName))
+                    .collect(Collectors.toList());
+        }
+
+        return salons.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     public SalonDTO uploadSalonImage(Long salonId, org.springframework.web.multipart.MultipartFile file) {
         Salon salon = salonRepository.findById(salonId)
                 .orElseThrow(() -> new RuntimeException("Salon not found with id: " + salonId));

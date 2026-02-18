@@ -71,4 +71,18 @@ public class AppointmentController {
             @PathVariable Appointment.AppointmentStatus status) {
         return ResponseEntity.ok(appointmentService.getAppointmentsByStatus(status));
     }
+
+    @GetMapping("/service/{serviceId}")
+    public ResponseEntity<List<AppointmentDTO>> getAppointmentsByService(
+            @PathVariable Long serviceId,
+            @RequestParam(required = false) String date) {
+        
+        // If date is provided, filter by both service and date
+        if (date != null && !date.isEmpty()) {
+            return ResponseEntity.ok(appointmentService.getAppointmentsByServiceAndDate(serviceId, date));
+        }
+        
+        // Otherwise, return all appointments for the service
+        return ResponseEntity.ok(appointmentService.getAppointmentsByService(serviceId));
+    }
 }

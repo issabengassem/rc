@@ -21,6 +21,7 @@ import MySalons from "./pages/MySalons";
 import SalonEdit from "./pages/SalonEdit";
 import SalonDashboard from "./pages/SalonDashboard";
 import SalonExplorerEnhanced from "./pages/SalonExplorerEnhanced";
+import Salons from "./pages/Salons";
 import SalonDetail from "./pages/SalonDetail";
 import AppointmentDetail from "./pages/AppointmentDetail";
 import ServiceFilter from "./pages/ServiceFilter";
@@ -45,6 +46,16 @@ function App() {
           {/* Salon Exploration */}
           <Route
             path="/salons"
+            element={
+              <ProtectedRoute>
+                <Salons />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Alternative route for old salon explorer (if needed) */}
+          <Route
+            path="/salons-old"
             element={
               <ProtectedRoute>
                 <SalonExplorerEnhanced />
