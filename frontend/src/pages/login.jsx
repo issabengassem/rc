@@ -79,7 +79,7 @@ const Login = () => {
                 Connexion
               </h2>
               <p className="text-white/80 text-xs sm:text-sm">
-                Accédez à votre compte ReservCut
+                Accédez à votre compte ReserveCut
               </p>
             </div>
 

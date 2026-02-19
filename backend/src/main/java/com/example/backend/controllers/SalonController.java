@@ -44,7 +44,23 @@ public class SalonController {
             @RequestParam("openingTime") @jakarta.validation.constraints.NotBlank(message = "Opening time is required") String openingTime,
             @RequestParam("closingTime") @jakarta.validation.constraints.NotBlank(message = "Closing time is required") String closingTime,
             @RequestParam("ownerId") @jakarta.validation.constraints.NotNull(message = "Owner ID is required") Long ownerId,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
             @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile image) {
+
+        // DEBUG: Log received parameters
+        System.out.println("=== Received Salon Creation Request ===");
+        System.out.println("Name: " + name);
+        System.out.println("City: " + city);
+        System.out.println("Owner ID: " + ownerId);
+        System.out.println("Latitude: " + latitude);
+        System.out.println("Longitude: " + longitude);
+        if (image != null && !image.isEmpty()) {
+            System.out.println("Image received: " + image.getOriginalFilename() + 
+                             " (size: " + image.getSize() + " bytes, type: " + image.getContentType() + ")");
+        } else {
+            System.out.println("No image received");
+        }
 
         // Build DTO from form parameters
         SalonDTO salonDTO = new SalonDTO();
@@ -56,6 +72,8 @@ public class SalonController {
         salonDTO.setOpeningTime(openingTime);
         salonDTO.setClosingTime(closingTime);
         salonDTO.setOwnerId(ownerId);
+        salonDTO.setLatitude(latitude);
+        salonDTO.setLongitude(longitude);
 
         // CHANGED: Create salon with image if provided
         SalonDTO createdSalon = salonService.createSalonWithImage(salonDTO, image);
@@ -127,5 +145,25 @@ public class SalonController {
     public ResponseEntity<Void> deleteSalonImage(@PathVariable Long id) {
         salonService.deleteSalonImage(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/update-image-url")
+    public ResponseEntity<SalonDTO> updateSalonImageUrl(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> body) {
+
+        String imageUrl = body.get("imageUrl");
+
+        // Validate URL
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            throw new RuntimeException("Image URL is required");
+        }
+
+        // Basic URL validation
+        if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+            throw new RuntimeException("Invalid URL format. URL must start with http:// or https://");
+        }
+
+        return ResponseEntity.ok(salonService.updateSalonImageUrl(id, imageUrl));
     }
 }

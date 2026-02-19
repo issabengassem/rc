@@ -147,34 +147,46 @@ export const userService = {
 // ==================== SALON ENDPOINTS ====================
 
 export const salonService = {
-  // Create salon with image
+  // Create salon with image - TWO STEP APPROACH (transparent to user)
+  // Step 1: Create salon with JSON, Step 2: Upload image separately
+  // This avoids Tomcat multipart file count limit issues
   createSalon: async (salonData, imageFile) => {
-    const formData = new FormData();
-    formData.append("name", salonData.name);
-    formData.append("address", salonData.address);
-    formData.append("city", salonData.city);
-    formData.append("phone", salonData.phone);
-    formData.append("description", salonData.description || "");
-    formData.append("openingTime", salonData.openingTime);
-    formData.append("closingTime", salonData.closingTime);
-    formData.append("ownerId", salonData.ownerId);
-
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
-
-    const token = localStorage.getItem("accessToken");
-    const headers = {};
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
+    // Step 1: Create salon without image (using JSON - no multipart issues)
     const response = await fetch(`${API_BASE_URL}/salons`, {
       method: "POST",
-      headers: headers,
-      body: formData,
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        name: salonData.name,
+        address: salonData.address,
+        city: salonData.city,
+        phone: salonData.phone,
+        description: salonData.description || "",
+        openingTime: salonData.openingTime,
+        closingTime: salonData.closingTime,
+        ownerId: salonData.ownerId,
+        latitude: salonData.latitude,
+        longitude: salonData.longitude,
+      }),
     });
-    return handleResponse(response);
+
+    const createdSalon = await handleResponse(response);
+
+    // Step 2: Upload image if provided (only 1 file = no multipart limit issues)
+    if (imageFile) {
+      try {
+        const updatedSalon = await salonService.uploadSalonImage(
+          createdSalon.id,
+          imageFile,
+        );
+        return updatedSalon;
+      } catch (error) {
+        console.warn("Image upload failed, but salon was created:", error);
+        // Return salon even if image upload fails
+        return createdSalon;
+      }
+    }
+
+    return createdSalon;
   },
 
   // Get all salons
@@ -289,10 +301,27 @@ export const salonService = {
     return response.ok;
   },
 
+  // Update salon image with URL
+  updateSalonImageUrl: async (salonId, imageUrl) => {
+    const response = await fetch(
+      `${API_BASE_URL}/salons/${salonId}/update-image-url`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ imageUrl }),
+      },
+    );
+    return handleResponse(response);
+  },
+
   // Get image URL
   getImageUrl: (imagePath) => {
     if (!imagePath) return null;
-    // Construct the full URL for the image
+    // If it's already a full URL, return it as is
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    }
+    // Otherwise, construct the full URL for the local file
     return `http://localhost:8080/api/files/salons/${imagePath}`;
   },
 };

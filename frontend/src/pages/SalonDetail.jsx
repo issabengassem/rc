@@ -8,9 +8,21 @@ import {
   Calendar,
   Star,
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { salonService } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
 import ReviewsList from "../components/ReviewsList";
+
+// Fix Leaflet default marker icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 const SalonDetail = () => {
   const { id } = useParams();
@@ -248,6 +260,46 @@ const SalonDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Map Section - Show salon location */}
+          {salon.latitude && salon.longitude && (
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              <div className="p-6 border-b">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <MapPin className="w-6 h-6 text-blue-600" />
+                  Localisation
+                </h2>
+              </div>
+              <div className="h-96">
+                <MapContainer
+                  center={[salon.latitude, salon.longitude]}
+                  zoom={15}
+                  style={{ height: "100%", width: "100%" }}
+                  scrollWheelZoom={false}
+                  dragging={true}
+                  zoomControl={true}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={[salon.latitude, salon.longitude]}>
+                    <Popup>
+                      <div className="text-center">
+                        <h3 className="font-bold text-gray-800">
+                          {salon.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {salon.address}
+                        </p>
+                        <p className="text-sm text-gray-600">{salon.city}</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                </MapContainer>
+              </div>
+            </div>
+          )}
 
           {/* Reviews Section */}
           <div className="bg-white rounded-lg shadow-lg p-8">

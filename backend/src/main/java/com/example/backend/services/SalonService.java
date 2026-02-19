@@ -91,6 +91,8 @@ public class SalonService {
         salon.setDescription(salonDTO.getDescription());
         salon.setOpeningTime(LocalTime.parse(salonDTO.getOpeningTime()));
         salon.setClosingTime(LocalTime.parse(salonDTO.getClosingTime()));
+        salon.setLatitude(salonDTO.getLatitude());
+        salon.setLongitude(salonDTO.getLongitude());
 
         Salon updatedSalon = salonRepository.save(salon);
         return convertToDTO(updatedSalon);
@@ -168,13 +170,15 @@ public class SalonService {
         Salon salon = salonRepository.findById(salonId)
                 .orElseThrow(() -> new RuntimeException("Salon not found with id: " + salonId));
 
-        // Delete old image if exists
+        // Delete old image if exists and is a local file (not a URL)
         if (salon.getImagePath() != null && !salon.getImagePath().isEmpty()) {
-            try {
-                fileStorageService.deleteFile(salon.getImagePath());
-            } catch (Exception e) {
-                // Log but don't fail if old image deletion fails
-                System.err.println("Could not delete old image: " + e.getMessage());
+            if (!salon.getImagePath().startsWith("http://") && !salon.getImagePath().startsWith("https://")) {
+                try {
+                    fileStorageService.deleteFile(salon.getImagePath());
+                } catch (Exception e) {
+                    // Log but don't fail if old image deletion fails
+                    System.err.println("Could not delete old image: " + e.getMessage());
+                }
             }
         }
 
@@ -191,10 +195,38 @@ public class SalonService {
                 .orElseThrow(() -> new RuntimeException("Salon not found with id: " + salonId));
 
         if (salon.getImagePath() != null && !salon.getImagePath().isEmpty()) {
-            fileStorageService.deleteFile(salon.getImagePath());
+            // Only delete file if it's a local file (not a URL)
+            if (!salon.getImagePath().startsWith("http://") && !salon.getImagePath().startsWith("https://")) {
+                try {
+                    fileStorageService.deleteFile(salon.getImagePath());
+                } catch (Exception e) {
+                    System.err.println("Could not delete file: " + e.getMessage());
+                }
+            }
             salon.setImagePath(null);
             salonRepository.save(salon);
         }
+    }
+
+    public SalonDTO updateSalonImageUrl(Long salonId, String imageUrl) {
+        Salon salon = salonRepository.findById(salonId)
+                .orElseThrow(() -> new RuntimeException("Salon not found with id: " + salonId));
+
+        // Delete old image file if it exists and is not a URL
+        if (salon.getImagePath() != null && !salon.getImagePath().isEmpty()) {
+            if (!salon.getImagePath().startsWith("http://") && !salon.getImagePath().startsWith("https://")) {
+                try {
+                    fileStorageService.deleteFile(salon.getImagePath());
+                } catch (Exception e) {
+                    System.err.println("Could not delete old image: " + e.getMessage());
+                }
+            }
+        }
+
+        // Save the URL directly
+        salon.setImagePath(imageUrl);
+        Salon updatedSalon = salonRepository.save(salon);
+        return convertToDTO(updatedSalon);
     }
 
     private SalonDTO convertToDTO(Salon salon) {
@@ -210,6 +242,8 @@ public class SalonService {
         dto.setOwnerId(salon.getOwner().getId());
         dto.setOwnerName(salon.getOwner().getName());
         dto.setImagePath(salon.getImagePath());
+        dto.setLatitude(salon.getLatitude());
+        dto.setLongitude(salon.getLongitude());
         return dto;
     }
 
@@ -224,6 +258,8 @@ public class SalonService {
         salon.setClosingTime(LocalTime.parse(dto.getClosingTime()));
         salon.setOwner(owner);
         salon.setImagePath(dto.getImagePath());
+        salon.setLatitude(dto.getLatitude());
+        salon.setLongitude(dto.getLongitude());
         return salon;
     }
 }

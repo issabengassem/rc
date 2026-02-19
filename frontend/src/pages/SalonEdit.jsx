@@ -9,10 +9,13 @@ import {
   DollarSign,
   Clock,
   Trash2,
+  Link as LinkIcon,
+  Image as ImageIcon,
 } from "lucide-react";
 import { salonService, serviceService } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
+import MapPicker from "../components/MapPicker";
 
 function SalonEdit() {
   const { id } = useParams();
@@ -28,12 +31,18 @@ function SalonEdit() {
     description: "",
     openingTime: "",
     closingTime: "",
+    latitude: null,
+    longitude: null,
   });
   const [services, setServices] = useState([]);
   const [deletedServiceIds, setDeletedServiceIds] = useState([]);
   const [newImage, setNewImage] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [showDeleteImageModal, setShowDeleteImageModal] = useState(false);
+  const [imageMode, setImageMode] = useState("upload"); // 'upload' or 'url'
+  const [imageUrl, setImageUrl] = useState("");
+  const [urlPreview, setUrlPreview] = useState(null);
+  const [urlError, setUrlError] = useState("");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
@@ -89,6 +98,8 @@ function SalonEdit() {
         description: data.description || "",
         openingTime: data.openingTime,
         closingTime: data.closingTime,
+        latitude: data.latitude,
+        longitude: data.longitude,
       });
 
       if (data.imagePath) {
@@ -186,13 +197,19 @@ function SalonEdit() {
         openingTime: salon.openingTime,
         closingTime: salon.closingTime,
         ownerId: user.id,
+        latitude: salon.latitude,
+        longitude: salon.longitude,
       };
 
       await salonService.updateSalon(id, updatedData);
 
-      // Upload new image if selected
-      if (newImage) {
+      // Handle image updates
+      if (imageMode === "upload" && newImage) {
+        // Upload new image file
         await salonService.uploadSalonImage(id, newImage);
+      } else if (imageMode === "url" && imageUrl && imageUrl.trim() !== "") {
+        // Update with URL
+        await salonService.updateSalonImageUrl(id, imageUrl.trim());
       }
 
       // Handle service changes
@@ -269,6 +286,56 @@ function SalonEdit() {
     setNewImage(null);
     const fileInput = document.getElementById("imageInput");
     if (fileInput) fileInput.value = "";
+  };
+
+  const handleUrlChange = (e) => {
+    const url = e.target.value;
+    setImageUrl(url);
+    setUrlError("");
+    setUrlPreview(null);
+
+    // Clear any previous image selections
+    setNewImage(null);
+    const fileInput = document.getElementById("imageInput");
+    if (fileInput) fileInput.value = "";
+  };
+
+  const handleUrlBlur = () => {
+    if (imageUrl && imageUrl.trim() !== "") {
+      const url = imageUrl.trim();
+
+      // Validate URL format
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        setUrlError("L'URL doit commencer par http:// ou https://");
+        return;
+      }
+
+      // Try to load the image to validate it
+      const img = new Image();
+      img.onload = () => {
+        setUrlPreview(url);
+        setUrlError("");
+      };
+      img.onerror = () => {
+        setUrlError("Impossible de charger l'image depuis cette URL");
+        setUrlPreview(null);
+      };
+      img.src = url;
+    }
+  };
+
+  const handleImageModeChange = (mode) => {
+    setImageMode(mode);
+    // Clear both selections when switching modes
+    if (mode === "upload") {
+      setImageUrl("");
+      setUrlPreview(null);
+      setUrlError("");
+    } else {
+      setNewImage(null);
+      const fileInput = document.getElementById("imageInput");
+      if (fileInput) fileInput.value = "";
+    }
   };
 
   const handleDeleteImageClick = () => {
@@ -431,6 +498,28 @@ function SalonEdit() {
                 placeholder="Décrivez votre salon..."
               />
             </div>
+          </div>
+
+          {/* Location Map */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Emplacement du salon
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Sélectionnez l'emplacement exact de votre salon sur la carte
+            </p>
+            <MapPicker
+              latitude={salon.latitude}
+              longitude={salon.longitude}
+              city={salon.city}
+              onLocationChange={(lat, lng) => {
+                setSalon({
+                  ...salon,
+                  latitude: lat,
+                  longitude: lng,
+                });
+              }}
+            />
           </div>
 
           {/* Services Management */}
@@ -596,8 +685,36 @@ function SalonEdit() {
               Gestion de l'image
             </h2>
 
+            {/* Mode Toggle */}
+            <div className="flex gap-3 mb-6">
+              <button
+                type="button"
+                onClick={() => handleImageModeChange("upload")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  imageMode === "upload"
+                    ? "bg-primary-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <Upload size={20} />
+                Télécharger une image
+              </button>
+              <button
+                type="button"
+                onClick={() => handleImageModeChange("url")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  imageMode === "url"
+                    ? "bg-primary-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <LinkIcon size={20} />
+                Coller une URL
+              </button>
+            </div>
+
             {/* Current Image */}
-            {currentImage && !newImage && (
+            {currentImage && !newImage && !urlPreview && (
               <div className="mb-4">
                 <p className="text-sm font-medium text-gray-700 mb-2">
                   Image actuelle
@@ -607,11 +724,15 @@ function SalonEdit() {
                     src={currentImage}
                     alt="Current salon"
                     className="w-64 h-48 object-cover rounded-lg border border-gray-200"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/300x200?text=Image+non+disponible";
+                    }}
                   />
                   <button
                     type="button"
                     onClick={handleDeleteImageClick}
-                    className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700"
+                    className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
                   >
                     <X size={16} />
                   </button>
@@ -619,49 +740,113 @@ function SalonEdit() {
               </div>
             )}
 
-            {/* New Image Preview */}
-            {newImage && (
-              <div className="mb-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Nouvelle image
-                </p>
-                <div className="relative inline-block">
-                  <img
-                    src={URL.createObjectURL(newImage)}
-                    alt="New salon"
-                    className="w-64 h-48 object-cover rounded-lg border border-gray-200"
+            {/* Upload Mode */}
+            {imageMode === "upload" && (
+              <>
+                {/* New Image Preview */}
+                {newImage && (
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Nouvelle image
+                    </p>
+                    <div className="relative inline-block">
+                      <img
+                        src={URL.createObjectURL(newImage)}
+                        alt="New salon"
+                        className="w-64 h-48 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveNewImage}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <div>
+                  <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleImageChange}
+                    className="hidden"
                   />
-                  <button
-                    type="button"
-                    onClick={handleRemoveNewImage}
-                    className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700"
+                  <label
+                    htmlFor="imageInput"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 border border-primary-200 rounded-lg hover:bg-primary-100 cursor-pointer transition-colors"
                   >
-                    <X size={16} />
-                  </button>
+                    <ImageIcon size={20} />
+                    {newImage || currentImage
+                      ? "Changer l'image"
+                      : "Sélectionner une image"}
+                  </label>
+                  <p className="text-xs text-gray-500 mt-2">
+                    JPG, PNG, WEBP jusqu'à 5MB
+                  </p>
                 </div>
-              </div>
+              </>
             )}
 
-            {/* Upload Button */}
-            <div>
-              <input
-                type="file"
-                id="imageInput"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-              <label
-                htmlFor="imageInput"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 border border-primary-200 rounded-lg hover:bg-primary-100 cursor-pointer"
-              >
-                <Upload size={20} />
-                {newImage || currentImage
-                  ? "Changer l'image"
-                  : "Télécharger une image"}
-              </label>
-              <p className="text-xs text-gray-500 mt-2">PNG, JPG jusqu'à 5MB</p>
-            </div>
+            {/* URL Mode */}
+            {imageMode === "url" && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    URL de l'image
+                  </label>
+                  <input
+                    type="url"
+                    value={imageUrl}
+                    onChange={handleUrlChange}
+                    onBlur={handleUrlBlur}
+                    placeholder="https://example.com/image.jpg"
+                    className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                      urlError ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {urlError && (
+                    <p className="text-sm text-red-600 mt-1">{urlError}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Collez l'URL d'une image hébergée en ligne
+                  </p>
+                </div>
+
+                {/* URL Preview */}
+                {urlPreview && (
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Aperçu de l'image
+                    </p>
+                    <div className="relative inline-block">
+                      <img
+                        src={urlPreview}
+                        alt="URL preview"
+                        className="w-64 h-48 object-cover rounded-lg border border-gray-200"
+                        onError={() => {
+                          setUrlError("Impossible de charger l'image");
+                          setUrlPreview(null);
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageUrl("");
+                          setUrlPreview(null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* Actions */}

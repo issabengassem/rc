@@ -70,9 +70,10 @@ const UserProfile = () => {
 
     try {
       // ENDPOINT USED: userService.updateUser()
+      // Note: Email is not included as it cannot be changed
       const updatedUser = await userService.updateUser(user.id, {
         name: formData.name,
-        email: formData.email,
+        email: user.email, // Keep original email, not from form
         phone: formData.phone,
         role: user.role,
       });
@@ -190,6 +191,9 @@ const UserProfile = () => {
                     Email
                   </label>
                   <p className="text-lg text-gray-900">{user.email}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    L'adresse email ne peut pas être modifiée
+                  </p>
                 </div>
 
                 <div>
@@ -242,17 +246,18 @@ const UserProfile = () => {
                 <div>
                   <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
                     <Mail size={16} className="mr-2" />
-                    Email <span className="text-red-500 ml-1">*</span>
+                    Email
                   </label>
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                    disabled
+                    readOnly
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    L'adresse email ne peut pas être modifiée
+                  </p>
                 </div>
 
                 <div>

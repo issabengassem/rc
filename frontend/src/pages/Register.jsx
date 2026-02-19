@@ -91,7 +91,7 @@ const Register = () => {
                 Inscription
               </h2>
               <p className="text-white/80 text-xs sm:text-sm">
-                Créez votre compte ReservCut
+                Créez votre compte ReserveCut
               </p>
             </div>
 

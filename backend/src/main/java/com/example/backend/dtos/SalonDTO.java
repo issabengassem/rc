@@ -39,4 +39,8 @@ public class SalonDTO {
     private String ownerName;
 
     private String imagePath;
+
+    private Double latitude;
+
+    private Double longitude;
 }

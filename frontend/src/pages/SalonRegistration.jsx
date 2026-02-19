@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { salonService, serviceService } from "../services/apiService"; // Import API services
 import { useToast } from "../contexts/ToastContext";
+import MapPicker from "../components/MapPicker";
 
 const SalonRegistration = () => {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ const SalonRegistration = () => {
     city: "",
     description: "",
     openingHours: "09:00 - 20:00",
+    latitude: null,
+    longitude: null,
   });
 
   // Services are now managed separately as an array of objects
@@ -124,6 +127,12 @@ const SalonRegistration = () => {
       );
       return false;
     }
+    if (!formData.latitude || !formData.longitude) {
+      toast.warning(
+        "Veuillez sélectionner l'emplacement du salon sur la carte",
+      );
+      return false;
+    }
 
     // Validate services
     for (let i = 0; i < services.length; i++) {
@@ -186,6 +195,8 @@ const SalonRegistration = () => {
         openingTime: openingTime,
         closingTime: closingTime,
         ownerId: user.id, // Get from authenticated user
+        latitude: formData.latitude,
+        longitude: formData.longitude,
       };
 
       // CHANGED: Call API service to create salon
@@ -401,6 +412,28 @@ const SalonRegistration = () => {
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none transition resize-none"
                 placeholder="Décrivez votre salon..."
                 rows="3"
+              />
+            </div>
+
+            {/* Map Location Picker */}
+            <div className="border-2 border-primary-200 rounded-xl p-6 bg-gradient-to-br from-primary-50 to-white">
+              <label className="text-xs font-semibold text-gray-700 uppercase mb-3 block">
+                Emplacement du salon <span className="text-red-500">*</span>
+              </label>
+              <p className="text-sm text-gray-600 mb-4">
+                Sélectionnez l'emplacement exact de votre salon sur la carte
+              </p>
+              <MapPicker
+                latitude={formData.latitude}
+                longitude={formData.longitude}
+                city={formData.city}
+                onLocationChange={(lat, lng) => {
+                  setFormData({
+                    ...formData,
+                    latitude: lat,
+                    longitude: lng,
+                  });
+                }}
               />
             </div>
 

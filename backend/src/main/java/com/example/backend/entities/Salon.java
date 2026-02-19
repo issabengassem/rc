@@ -43,6 +43,12 @@ public class Salon {
     @Column(name = "image_path")
     private String imagePath;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     // Relationships
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
