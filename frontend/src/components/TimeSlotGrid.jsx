@@ -131,37 +131,39 @@ const TimeSlotGrid = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      {/* Header with legend */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <Clock className="w-5 h-5 mr-2 text-indigo-600" />
-          Créneaux Disponibles - {selectedDate}
+    <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
+      {/* Header with legend - Mobile Optimized */}
+      <div className="mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-indigo-600" />
+          <span className="text-sm sm:text-base">
+            Créneaux - {selectedDate}
+          </span>
         </h3>
 
-        {/* Color Legend */}
-        <div className="flex flex-wrap gap-4 text-sm">
+        {/* Color Legend - Stack on mobile */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
+            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded mr-1.5 sm:mr-2"></div>
             <span className="text-gray-700">Disponible</span>
           </div>
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-red-500 rounded mr-2"></div>
+            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded mr-1.5 sm:mr-2"></div>
             <span className="text-gray-700">Réservé</span>
           </div>
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
+            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-300 rounded mr-1.5 sm:mr-2"></div>
             <span className="text-gray-700">Passé</span>
           </div>
           <div className="flex items-center">
-            <div className="w-4 h-4 bg-indigo-600 rounded mr-2"></div>
+            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-indigo-600 rounded mr-1.5 sm:mr-2"></div>
             <span className="text-gray-700">Sélectionné</span>
           </div>
         </div>
 
         {selectedService && (
           <div className="mt-3 space-y-2">
-            <div className="text-sm text-gray-600">
+            <div className="text-xs sm:text-sm text-gray-600">
               <span className="font-medium">Service:</span>{" "}
               {selectedService.name}{" "}
               <span className="text-gray-500">
@@ -185,8 +187,8 @@ const TimeSlotGrid = ({
         )}
       </div>
 
-      {/* Time Slot Grid */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-96 overflow-y-auto">
+      {/* Time Slot Grid - Mobile: 3 cols, Tablet: 4, Desktop: 6-8 */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3 max-h-96 overflow-y-auto">
         {slots.map((slot) => {
           const isSelected =
             selectedSlot && selectedSlot.datetime === slot.datetime;
@@ -195,7 +197,7 @@ const TimeSlotGrid = ({
             slot.status === "reserved" ? getReservationInfo(slot) : null;
 
           let slotClasses =
-            "relative p-3 rounded-lg text-center text-sm font-medium transition-all duration-200 ";
+            "relative p-3 sm:p-3.5 rounded-lg text-center text-sm sm:text-base font-medium transition-all duration-200 min-h-[52px] sm:min-h-[60px] flex flex-col items-center justify-center active:scale-95 ";
 
           // Determine slot style based on status
           if (slot.isPast || slot.status === "past") {

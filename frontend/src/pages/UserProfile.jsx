@@ -148,89 +148,112 @@ const UserProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mon Profil</h1>
-          <p className="text-gray-600">Gérez vos informations personnelles</p>
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 md:py-8">
+      {/* Mobile-first Container with Proper Padding */}
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header - Responsive Typography */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">
+            Mon Profil
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Gérez vos informations personnelles
+          </p>
         </div>
 
-        {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          {/* Header with Avatar */}
-          <div className="bg-gradient-to-r from-primary-600 to-secondary-600 p-8 text-center">
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <span className="text-4xl font-bold text-primary-600">
+        {/* Profile Card - Fully Responsive */}
+        <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-md sm:shadow-lg overflow-hidden transition-shadow hover:shadow-xl">
+          {/* Header with Avatar - Responsive Padding */}
+          <div className="bg-gradient-to-r from-primary-600 to-secondary-600 p-6 sm:p-8 lg:p-10 text-center">
+            {/* Responsive Avatar */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-white rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-600">
                 {user.name.charAt(0).toUpperCase()}
               </span>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-1">{user.name}</h2>
-            <p className="text-primary-100 text-sm">
+            {/* Responsive Text */}
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 break-words px-2">
+              {user.name}
+            </h2>
+            <p className="text-primary-100 text-xs sm:text-sm">
               Membre depuis{" "}
               {new Date(user.createdAt).toLocaleDateString("fr-FR")}
             </p>
           </div>
 
-          {/* Profile Form */}
-          <div className="p-8">
+          {/* Profile Form - Mobile-First Padding */}
+          <div className="p-4 sm:p-6 lg:p-8">
             {!editing ? (
               // View Mode
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
+                {/* User Name Field */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-500 mb-2">
-                    <User size={16} className="mr-2" />
-                    Nom complet
+                  <label className="flex items-center text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                    <User size={14} className="mr-2 sm:mr-2 flex-shrink-0" />
+                    <span>Nom complet</span>
                   </label>
-                  <p className="text-lg text-gray-900">{user.name}</p>
+                  <p className="text-base sm:text-lg text-gray-900 break-words">
+                    {user.name}
+                  </p>
                 </div>
 
+                {/* Email Field */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-500 mb-2">
-                    <Mail size={16} className="mr-2" />
-                    Email
+                  <label className="flex items-center text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                    <Mail size={14} className="mr-2 sm:mr-2 flex-shrink-0" />
+                    <span>Email</span>
                   </label>
-                  <p className="text-lg text-gray-900">{user.email}</p>
+                  <p className="text-base sm:text-lg text-gray-900 break-all">
+                    {user.email}
+                  </p>
                   <p className="text-xs text-gray-400 mt-1">
                     L'adresse email ne peut pas être modifiée
                   </p>
                 </div>
 
+                {/* Phone Field */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-500 mb-2">
-                    <Phone size={16} className="mr-2" />
-                    Téléphone
+                  <label className="flex items-center text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">
+                    <Phone size={14} className="mr-2 sm:mr-2 flex-shrink-0" />
+                    <span>Téléphone</span>
                   </label>
-                  <p className="text-lg text-gray-900">{user.phone}</p>
+                  <p className="text-base sm:text-lg text-gray-900 break-words">
+                    {user.phone}
+                  </p>
                 </div>
 
+                {/* Account Type */}
                 <div>
-                  <label className="text-sm font-medium text-gray-500 mb-2 block">
+                  <label className="text-xs sm:text-sm font-medium text-gray-500 mb-2 block">
                     Type de compte
                   </label>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-primary-100 text-primary-700">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-primary-100 text-primary-700">
                     {user.role}
                   </span>
                 </div>
 
-                {/* Edit Button */}
-                <div className="pt-6 border-t">
+                {/* Edit Button - Full Width on Mobile */}
+                <div className="pt-4 sm:pt-6 border-t">
                   <button
                     onClick={() => setEditing(true)}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 sm:py-3 min-h-[44px] bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 active:bg-primary-800 transition-colors duration-200"
                   >
-                    <Edit2 size={18} />
-                    Modifier mon profil
+                    <Edit2 size={18} className="flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      Modifier mon profil
+                    </span>
                   </button>
                 </div>
               </div>
             ) : (
               // Edit Mode
-              <form onSubmit={handleUpdate} className="space-y-6">
+              <form onSubmit={handleUpdate} className="space-y-4 sm:space-y-6">
+                {/* Name Input */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                    <User size={16} className="mr-2" />
-                    Nom complet <span className="text-red-500 ml-1">*</span>
+                  <label className="flex items-center text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    <User size={14} className="mr-2 flex-shrink-0" />
+                    <span>Nom complet</span>
+                    <span className="text-red-500 ml-1">*</span>
                   </label>
                   <input
                     type="text"
@@ -238,20 +261,23 @@ const UserProfile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+                    style={{ fontSize: "16px" }}
                     required
                   />
                 </div>
 
+                {/* Email Input (Disabled) */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                    <Mail size={16} className="mr-2" />
-                    Email
+                  <label className="flex items-center text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    <Mail size={14} className="mr-2 flex-shrink-0" />
+                    <span>Email</span>
                   </label>
                   <input
                     type="email"
                     value={formData.email}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                    style={{ fontSize: "16px" }}
                     disabled
                     readOnly
                   />
@@ -260,10 +286,12 @@ const UserProfile = () => {
                   </p>
                 </div>
 
+                {/* Phone Input */}
                 <div>
-                  <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                    <Phone size={16} className="mr-2" />
-                    Téléphone <span className="text-red-500 ml-1">*</span>
+                  <label className="flex items-center text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                    <Phone size={14} className="mr-2 flex-shrink-0" />
+                    <span>Téléphone</span>
+                    <span className="text-red-500 ml-1">*</span>
                   </label>
                   <input
                     type="tel"
@@ -271,20 +299,23 @@ const UserProfile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
+                    style={{ fontSize: "16px" }}
                     required
                   />
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-4 pt-6 border-t">
+                {/* Action Buttons - Stack on Mobile, Side-by-Side on Desktop */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 border-t">
                   <button
                     type="submit"
                     disabled={saving}
-                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`w-full sm:flex-1 flex items-center justify-center gap-2 px-6 py-3 min-h-[44px] bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 active:bg-primary-800 transition-colors duration-200 ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
-                    <Save size={18} />
-                    {saving ? "Enregistrement..." : "Enregistrer"}
+                    <Save size={18} className="flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      {saving ? "Enregistrement..." : "Enregistrer"}
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -296,47 +327,59 @@ const UserProfile = () => {
                         phone: user.phone,
                       });
                     }}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+                    className="w-full sm:flex-1 flex items-center justify-center gap-2 px-6 py-3 min-h-[44px] border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200"
                   >
-                    <X size={18} />
-                    Annuler
+                    <X size={18} className="flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Annuler</span>
                   </button>
                 </div>
               </form>
             )}
           </div>
 
-          {/* Danger Zone */}
+          {/* Danger Zone - Responsive Padding */}
           {!editing && (
-            <div className="bg-red-50 border-t border-red-200 p-8">
-              <h3 className="text-lg font-bold text-red-900 mb-2">
+            <div className="bg-red-50 border-t border-red-200 p-4 sm:p-6 lg:p-8">
+              <h3 className="text-base sm:text-lg font-bold text-red-900 mb-2">
                 Zone de danger
               </h3>
-              <p className="text-sm text-red-700 mb-4">
+              <p className="text-xs sm:text-sm text-red-700 mb-4">
                 La suppression de votre compte est définitive et irréversible.
               </p>
               <button
                 onClick={handleDeleteClick}
-                className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 min-h-[44px] bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 active:bg-red-800 transition-colors duration-200"
               >
-                <Trash2 size={18} />
-                Supprimer mon compte
+                <Trash2 size={18} className="flex-shrink-0" />
+                <span className="text-sm sm:text-base">
+                  Supprimer mon compte
+                </span>
               </button>
             </div>
           )}
         </div>
 
-        {/* Stats Card */}
-        <div className="mt-6 bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Statistiques</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-primary-600">-</p>
-              <p className="text-sm text-gray-600">Rendez-vous</p>
+        {/* Stats Card - Responsive Grid */}
+        <div className="mt-4 sm:mt-6 bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-md sm:shadow-lg p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">
+            Statistiques
+          </h3>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg transition-transform hover:scale-105">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary-600">
+                -
+              </p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                Rendez-vous
+              </p>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-primary-600">-</p>
-              <p className="text-sm text-gray-600">Salons visités</p>
+            <div className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg transition-transform hover:scale-105">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary-600">
+                -
+              </p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                Salons visités
+              </p>
             </div>
           </div>
         </div>

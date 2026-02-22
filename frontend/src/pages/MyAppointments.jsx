@@ -148,10 +148,10 @@ const MyAppointments = () => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white rounded-xl shadow-sm p-2 mb-6 flex gap-2 overflow-x-auto">
+        <div className="bg-white rounded-xl shadow-sm p-2 mb-6 flex gap-2 sm:gap-3 overflow-x-auto">
           <button
             onClick={() => setFilter("ALL")}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition whitespace-nowrap ${
+            className={`flex-1 min-w-[90px] py-2 px-3 sm:px-4 rounded-lg font-medium transition whitespace-nowrap text-sm sm:text-base ${
               filter === "ALL"
                 ? "bg-primary-600 text-white"
                 : "text-gray-600 hover:bg-gray-100"
@@ -161,7 +161,7 @@ const MyAppointments = () => {
           </button>
           <button
             onClick={() => setFilter("PENDING")}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition whitespace-nowrap ${
+            className={`flex-1 min-w-[110px] py-2 px-3 sm:px-4 rounded-lg font-medium transition whitespace-nowrap text-sm sm:text-base ${
               filter === "PENDING"
                 ? "bg-yellow-500 text-white"
                 : "text-gray-600 hover:bg-gray-100"
@@ -172,7 +172,7 @@ const MyAppointments = () => {
           </button>
           <button
             onClick={() => setFilter("CONFIRMED")}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition whitespace-nowrap ${
+            className={`flex-1 min-w-[110px] py-2 px-3 sm:px-4 rounded-lg font-medium transition whitespace-nowrap text-sm sm:text-base ${
               filter === "CONFIRMED"
                 ? "bg-green-500 text-white"
                 : "text-gray-600 hover:bg-gray-100"
@@ -183,7 +183,7 @@ const MyAppointments = () => {
           </button>
           <button
             onClick={() => setFilter("CANCELLED")}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition whitespace-nowrap ${
+            className={`flex-1 min-w-[100px] py-2 px-3 sm:px-4 rounded-lg font-medium transition whitespace-nowrap text-sm sm:text-base ${
               filter === "CANCELLED"
                 ? "bg-red-500 text-white"
                 : "text-gray-600 hover:bg-gray-100"

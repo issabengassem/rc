@@ -22,6 +22,7 @@ const SalonRegistration = () => {
   const toast = useToast();
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [addLocation, setAddLocation] = useState(false); // Toggle for map visibility
   const [formData, setFormData] = useState({
     salonName: "",
     ownerName: "",
@@ -127,9 +128,10 @@ const SalonRegistration = () => {
       );
       return false;
     }
-    if (!formData.latitude || !formData.longitude) {
+    // Only validate location if user chose to add it
+    if (addLocation && (!formData.latitude || !formData.longitude)) {
       toast.warning(
-        "Veuillez sélectionner l'emplacement du salon sur la carte",
+        "Veuillez sélectionner l'emplacement du salon sur la carte ou décochez l'option",
       );
       return false;
     }
@@ -185,7 +187,7 @@ const SalonRegistration = () => {
         return;
       }
 
-      // CHANGED: Prepare salon data
+      // CHANGED: Prepare salon data - coordinates are optional
       const salonData = {
         name: formData.salonName,
         address: formData.address,
@@ -195,8 +197,8 @@ const SalonRegistration = () => {
         openingTime: openingTime,
         closingTime: closingTime,
         ownerId: user.id, // Get from authenticated user
-        latitude: formData.latitude,
-        longitude: formData.longitude,
+        latitude: addLocation ? formData.latitude : null,
+        longitude: addLocation ? formData.longitude : null,
       };
 
       // CHANGED: Call API service to create salon
@@ -415,26 +417,70 @@ const SalonRegistration = () => {
               />
             </div>
 
-            {/* Map Location Picker */}
+            {/* Map Location Picker - OPTIONAL */}
             <div className="border-2 border-primary-200 rounded-xl p-6 bg-gradient-to-br from-primary-50 to-white">
               <label className="text-xs font-semibold text-gray-700 uppercase mb-3 block">
-                Emplacement du salon <span className="text-red-500">*</span>
+                Emplacement du salon (Optionnel)
               </label>
               <p className="text-sm text-gray-600 mb-4">
-                Sélectionnez l'emplacement exact de votre salon sur la carte
+                Vous pouvez ajouter la localisation de votre salon maintenant ou
+                plus tard dans les paramètres.
               </p>
-              <MapPicker
-                latitude={formData.latitude}
-                longitude={formData.longitude}
-                city={formData.city}
-                onLocationChange={(lat, lng) => {
-                  setFormData({
-                    ...formData,
-                    latitude: lat,
-                    longitude: lng,
-                  });
-                }}
-              />
+
+              {/* Radio buttons for location choice */}
+              <div className="space-y-3 mb-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="locationChoice"
+                    checked={!addLocation}
+                    onChange={() => {
+                      setAddLocation(false);
+                      // Clear coordinates when skipping
+                      setFormData({
+                        ...formData,
+                        latitude: null,
+                        longitude: null,
+                      });
+                    }}
+                    className="w-4 h-4 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Passer l'emplacement pour l'instant
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="locationChoice"
+                    checked={addLocation}
+                    onChange={() => setAddLocation(true)}
+                    className="w-4 h-4 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Ajouter l'emplacement sur la carte
+                  </span>
+                </label>
+              </div>
+
+              {/* Map - Only shown if addLocation is true */}
+              {addLocation && (
+                <div className="animate-fadeIn">
+                  <MapPicker
+                    latitude={formData.latitude}
+                    longitude={formData.longitude}
+                    city={formData.city}
+                    onLocationChange={(lat, lng) => {
+                      setFormData({
+                        ...formData,
+                        latitude: lat,
+                        longitude: lng,
+                      });
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Services Section */}

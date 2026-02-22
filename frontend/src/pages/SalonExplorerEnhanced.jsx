@@ -306,21 +306,21 @@ const SalonExplorerEnhanced = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header & Search */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Header & Search - Mobile Optimized */}
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-gray-900">
             Explorez nos salons
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-4">
             Recherche avancée et filtres personnalisés
           </p>
 
-          <div className="max-w-2xl mx-auto relative shadow-sm rounded-full overflow-hidden border bg-white">
+          <div className="max-w-2xl mx-auto relative shadow-md rounded-xl sm:rounded-full overflow-hidden border bg-white">
             <input
               type="text"
-              placeholder="Rechercher un salon, une ville, une adresse..."
-              className="w-full py-4 px-6 pl-12 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              placeholder="Rechercher un salon..."
+              className="w-full py-3.5 sm:py-4 px-5 sm:px-6 pl-11 sm:pl-12 text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
             />
@@ -330,14 +330,14 @@ const SalonExplorerEnhanced = () => {
               </div>
             )}
             <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400"
               size={20}
             />
           </div>
         </div>
 
-        {/* Advanced Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+        {/* Advanced Filters - Mobile Responsive */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Filter size={20} className="text-gray-600" />
             <h3 className="text-lg font-semibold text-gray-900">
@@ -345,7 +345,7 @@ const SalonExplorerEnhanced = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* City Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -453,8 +453,8 @@ const SalonExplorerEnhanced = () => {
           </p>
         </div>
 
-        {/* Salons Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Salons Grid - Mobile First: 1 column mobile, 2 tablet, 3 desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {filteredSalons.map((salon) => (
             <div
               key={salon.id}

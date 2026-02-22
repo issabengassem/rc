@@ -51,39 +51,46 @@ const ConfirmModal = ({
       ></div>
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+      <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+        <div className="relative bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 transform transition-all">
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
 
           {/* Icon */}
           <div
-            className={`w-12 h-12 rounded-full ${style.bg} ${style.border} border-2 flex items-center justify-center mb-4`}
+            className={`w-14 h-14 sm:w-12 sm:h-12 rounded-full ${style.bg} ${style.border} border-2 flex items-center justify-center mb-4 sm:mb-4`}
           >
-            <AlertTriangle className={style.icon} size={24} />
+            <AlertTriangle className={style.icon} size={26} />
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+          <h3 className="text-xl sm:text-xl font-bold text-gray-900 mb-3 pr-8">
+            {title}
+          </h3>
 
           {/* Message */}
-          <p className="text-gray-600 mb-4">{message}</p>
+          <p className="text-base sm:text-base text-gray-600 mb-4 leading-relaxed">
+            {message}
+          </p>
 
           {/* Details */}
           {details && (
             <div
-              className={`${style.bg} ${style.border} border rounded-lg p-4 mb-6`}
+              className={`${style.bg} ${style.border} border rounded-lg p-4 mb-6 overflow-x-auto`}
             >
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {Object.entries(details).map(([key, value]) => (
-                  <div key={key} className="flex justify-between text-sm">
-                    <span className="font-medium text-gray-700">{key}:</span>
-                    <span className="text-gray-900">{value}</span>
+                  <div
+                    key={key}
+                    className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-3 text-sm sm:text-sm"
+                  >
+                    <span className="font-semibold text-gray-700">{key}:</span>
+                    <span className="text-gray-900 break-words">{value}</span>
                   </div>
                 ))}
               </div>
@@ -92,9 +99,9 @@ const ConfirmModal = ({
 
           {/* Input field for confirmation */}
           {requiresInput && (
-            <div className="mb-4">
+            <div className="mb-5">
               {inputLabel && (
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base sm:text-sm font-medium text-gray-700 mb-2">
                   {inputLabel}
                 </label>
               )}
@@ -103,17 +110,17 @@ const ConfirmModal = ({
                 value={inputValue}
                 onChange={(e) => onInputChange && onInputChange(e.target.value)}
                 placeholder={inputPlaceholder}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                className="w-full px-4 py-3.5 sm:py-2.5 text-base border border-gray-300 rounded-xl sm:rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors min-h-[52px] sm:min-h-[44px]"
                 autoFocus
               />
             </div>
           )}
 
           {/* Buttons */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              className="w-full sm:flex-1 px-4 py-4 sm:py-2.5 border border-gray-300 rounded-xl sm:rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors min-h-[52px] sm:min-h-[44px] text-base active:scale-98"
             >
               {cancelText}
             </button>
@@ -121,7 +128,7 @@ const ConfirmModal = ({
               onClick={() => {
                 onConfirm();
               }}
-              className={`flex-1 px-4 py-2.5 rounded-lg text-white font-medium transition-colors ${style.button}`}
+              className={`w-full sm:flex-1 px-4 py-4 sm:py-2.5 rounded-xl sm:rounded-lg text-white font-medium transition-colors min-h-[52px] sm:min-h-[44px] text-base active:scale-98 ${style.button}`}
             >
               {confirmText}
             </button>

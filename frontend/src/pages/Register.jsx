@@ -64,12 +64,11 @@ const Register = () => {
       console.log("User created:", result);
 
       toast.success(
-        `Compte créé avec succès! Bienvenue ${result.name}. Veuillez vous connecter avec vos identifiants.`,
-        "Inscription réussie",
+        "Compte créé avec succès! Vérifiez votre email pour le code de vérification.",
       );
 
-      // Redirect to login page since registration doesn't provide JWT token
-      navigate("/login");
+      // Redirect to verification page with email
+      navigate("/verify-email", { state: { email: formData.email } });
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(
@@ -280,11 +279,11 @@ const Register = () => {
                   </span>
                 </label>
 
-                {/* Submit Button */}
+                {/* Submit Button - Touch-friendly on mobile */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-2.5 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:opacity-90 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-full bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-4 text-base sm:text-lg rounded-xl font-semibold hover:opacity-90 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all min-h-[52px] ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {loading ? "Inscription en cours..." : "S'inscrire"}
                 </button>

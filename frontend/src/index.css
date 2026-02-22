@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ====================================================
+   MOBILE-FIRST GLOBAL RESET & BASE STYLES
+   ==================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px; /* Prevents iOS zoom on input focus */
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  width: 100%;
+}
+
 body {
   margin: 0;
   font-family:
@@ -9,12 +26,68 @@ body {
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  background-color: #f9fafb;
+  line-height: 1.6;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Prevent horizontal scroll globally */
+#root {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+/* ====================================================
+   MOBILE-FIRST RESPONSIVE IMAGES
+   ==================================================== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}
+
+/* ====================================================
+   MOBILE-FIRST TYPOGRAPHY - NO OVERFLOW
+   ==================================================== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Prevent text from causing horizontal scroll */
+* {
+  max-width: 100%;
+}
+
+/* ====================================================
+   ANIMATIONS
+   ==================================================== */
 
 /* Toast Animations */
 @keyframes slideInRight {
@@ -30,4 +103,524 @@ code {
 
 .animate-slideInRight {
   animation: slideInRight 0.3s ease-out;
+}
+
+/* Fade in animation for map and modals */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Slide in from left (for mobile menus) */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+/* Bounce animation for buttons */
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce 2s infinite;
+}
+
+/* ====================================================
+   MOBILE-FIRST TOUCH-FRIENDLY BUTTONS
+   ==================================================== */
+.btn-mobile {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 1rem; /* 16px - prevents iOS zoom */
+  font-weight: 600;
+  text-align: center;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px; /* Touch-friendly minimum */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn-mobile:active {
+  transform: scale(0.98);
+}
+
+@media (min-width: 768px) {
+  .btn-mobile {
+    width: auto;
+    min-width: 140px;
+    display: inline-block;
+  }
+}
+
+/* ====================================================
+   MOBILE-OPTIMIZED FORM INPUTS
+   ==================================================== */
+.input-mobile {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem; /* 16px minimum - prevents iOS zoom */
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  background: white;
+  min-height: 48px; /* Touch-friendly */
+}
+
+.input-mobile:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+textarea.input-mobile {
+  min-height: 120px;
+  resize: vertical;
+}
+
+select.input-mobile {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 20px;
+  padding-right: 40px;
+}
+
+/* Form label */
+.label-mobile {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+/* ====================================================
+   GLOBAL FORM INPUT FIXES - PREVENT IOS ZOOM
+   ==================================================== */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+textarea,
+select {
+  font-size: 16px !important; /* Prevents iOS zoom */
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 0.875rem !important; /* 14px on desktop */
+  }
+}
+
+/* ====================================================
+   RESPONSIVE UTILITIES
+   ==================================================== */
+
+/* Container with proper max-width */
+.responsive-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .responsive-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Grid Layouts */
+.grid-responsive-1-2-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive-1-2-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive-1-2-3 {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Grid for 1, 2, 4 columns */
+.grid-responsive-1-2-4 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive-1-2-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive-1-2-4 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* ====================================================
+   RESPONSIVE TYPOGRAPHY
+   ==================================================== */
+h1,
+.h1 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  h1,
+  .h1 {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  h1,
+  .h1 {
+    font-size: 3rem;
+    line-height: 3.5rem;
+  }
+}
+
+h2,
+.h2 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  h2,
+  .h2 {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+}
+
+h3,
+.h3 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  h3,
+  .h3 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+/* ====================================================
+   RESPONSIVE BUTTONS
+   ==================================================== */
+.btn-responsive {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+@media (min-width: 768px) {
+  .btn-responsive {
+    width: auto;
+    min-width: 10rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* ====================================================
+   RESPONSIVE FORMS
+   ==================================================== */
+.form-responsive {
+  width: 100%;
+}
+
+.form-responsive input,
+.form-responsive select,
+.form-responsive textarea {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .form-responsive input,
+  .form-responsive select,
+  .form-responsive textarea {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+/* ====================================================
+   RESPONSIVE MODALS
+   ==================================================== */
+.modal-responsive {
+  position: fixed;
+  inset: 0;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content-responsive {
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  background: white;
+  border-radius: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .modal-content-responsive {
+    max-width: 640px;
+  }
+}
+
+@media (max-width: 639px) {
+  .modal-responsive {
+    padding: 0;
+  }
+
+  .modal-content-responsive {
+    max-height: 100vh;
+    border-radius: 0;
+    height: 100%;
+  }
+}
+
+/* ====================================================
+   RESPONSIVE CARDS
+   ==================================================== */
+.card-responsive {
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card-responsive:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* ====================================================
+   RESPONSIVE MAP
+   ==================================================== */
+.map-responsive {
+  width: 100%;
+  height: 250px !important;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .map-responsive {
+    height: 350px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .map-responsive {
+    height: 450px !important;
+  }
+}
+
+/* MapContainer specific override */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-container.map-responsive {
+  height: 250px !important;
+}
+
+@media (min-width: 640px) {
+  .leaflet-container.map-responsive {
+    height: 350px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .leaflet-container.map-responsive {
+    height: 450px !important;
+  }
+}
+
+/* ====================================================
+   RESPONSIVE SPACING
+   ==================================================== */
+.section-spacing {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .section-spacing {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-spacing {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+/* ====================================================
+   HIDE SCROLLBAR (KEEP FUNCTIONALITY)
+   ==================================================== */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ====================================================
+   SAFE AREA INSETS (FOR MOBILE NOTCHES)
+   ==================================================== */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* ====================================================
+   TOUCH-FRIENDLY CLICKABLE AREAS
+   ==================================================== */
+@media (max-width: 768px) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ====================================================
+   RESPONSIVE TABLE (SCROLL HORIZONTALLY ON SMALL SCREENS)
+   ==================================================== */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .table-responsive-wrapper table {
+    min-width: 600px;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Fade in animation for map */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
 }

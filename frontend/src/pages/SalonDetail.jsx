@@ -261,15 +261,16 @@ const SalonDetail = () => {
             </div>
           </div>
 
-          {/* Map Section - Show salon location */}
-          {salon.latitude && salon.longitude && (
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="p-6 border-b">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  <MapPin className="w-6 h-6 text-blue-600" />
-                  Localisation
-                </h2>
-              </div>
+          {/* Map Section - Show salon location OR message if not provided */}
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="p-6 border-b">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <MapPin className="w-6 h-6 text-blue-600" />
+                Localisation
+              </h2>
+            </div>
+
+            {salon.latitude && salon.longitude ? (
               <div className="h-96">
                 <MapContainer
                   center={[salon.latitude, salon.longitude]}
@@ -298,8 +299,20 @@ const SalonDetail = () => {
                   </Marker>
                 </MapContainer>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="p-8 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                  <MapPin className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-600 text-lg mb-2">
+                  Localisation non fournie par le propriétaire du salon
+                </p>
+                <p className="text-gray-500 text-sm">
+                  L'adresse complète est disponible ci-dessus
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Reviews Section */}
           <div className="bg-white rounded-lg shadow-lg p-8">

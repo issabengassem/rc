@@ -203,14 +203,14 @@ function MapPicker({ latitude, longitude, onLocationChange, city = "" }) {
         )}
       </div>
 
-      {/* Map Container */}
-      <div className="border border-gray-300 rounded-lg overflow-hidden">
+      {/* Map Container - Mobile Responsive Height */}
+      <div className="border border-gray-300 rounded-xl overflow-hidden shadow-sm">
         <MapContainer
           key={mapKey}
           center={[position.lat, position.lng]}
           zoom={13}
-          style={{ height: "400px", width: "100%" }}
-          className="z-0"
+          style={{ height: "300px", width: "100%" }}
+          className="z-0 map-responsive"
           scrollWheelZoom={true}
         >
           <TileLayer

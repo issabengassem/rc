@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 import SalonRegistration from "./pages/SalonRegistration";
 import MyAppointments from "./pages/MyAppointments";
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Protected Pages - Authentication Required */}
 

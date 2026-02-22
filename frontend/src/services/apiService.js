@@ -13,6 +13,14 @@ const getAuthHeaders = () => {
 
 // Helper function for handling responses
 const handleResponse = async (response) => {
+  console.log("=== handleResponse ===");
+  console.log("Response status:", response.status);
+  console.log("Response ok:", response.ok);
+  console.log(
+    "Response headers:",
+    Object.fromEntries(response.headers.entries()),
+  );
+
   if (!response.ok) {
     // Handle 401 Unauthorized - token invalid or expired
     if (response.status === 401) {
@@ -22,12 +30,32 @@ const handleResponse = async (response) => {
       throw new Error("Session expirée. Veuillez vous reconnecter.");
     }
 
-    const error = await response
-      .json()
-      .catch(() => ({ message: "Request failed" }));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    // Try to get error message from response
+    let errorMessage = `HTTP error! status: ${response.status}`;
+    try {
+      const errorData = await response.json();
+      console.log("Error data from backend:", errorData);
+      errorMessage = errorData.message || errorData.error || errorMessage;
+    } catch (parseError) {
+      console.error("Failed to parse error response:", parseError);
+      // Try to get text instead
+      try {
+        const textResponse = await response.text();
+        console.log("Error response as text:", textResponse);
+        if (textResponse) {
+          errorMessage = textResponse;
+        }
+      } catch (textError) {
+        console.error("Failed to get text response:", textError);
+      }
+    }
+
+    throw new Error(errorMessage);
   }
-  return response.json();
+
+  const data = await response.json();
+  console.log("Success response data:", data);
+  return data;
 };
 
 // ==================== AUTHENTICATION ENDPOINTS ====================
@@ -74,6 +102,44 @@ export const authService = {
   // Get token
   getToken: () => {
     return localStorage.getItem("accessToken");
+  },
+
+  // Verify email with code
+  verifyEmail: async (email, verificationCode) => {
+    console.log("=== API SERVICE: verifyEmail ===");
+    console.log("Request URL:", `${API_BASE_URL}/users/verify-email`);
+    console.log("Request Body:", { email, verificationCode });
+
+    const response = await fetch(`${API_BASE_URL}/users/verify-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, verificationCode }),
+    });
+
+    console.log("Response status:", response.status);
+    console.log("Response ok:", response.ok);
+
+    const result = await handleResponse(response);
+    console.log("Parsed result:", result);
+    return result;
+  },
+
+  // Resend verification code
+  resendVerificationCode: async (email) => {
+    console.log("=== API SERVICE: resendVerificationCode ===");
+    console.log("Request URL:", `${API_BASE_URL}/users/resend-code`);
+    console.log("Request Body:", { email });
+
+    const response = await fetch(`${API_BASE_URL}/users/resend-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    console.log("Response status:", response.status);
+    const result = await handleResponse(response);
+    console.log("Parsed result:", result);
+    return result;
   },
 };
 

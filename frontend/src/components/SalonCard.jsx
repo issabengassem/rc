@@ -106,13 +106,14 @@ const SalonCard = ({ salon }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100">
-      {/* Image Section */}
-      <div className="relative h-48 bg-gray-200">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 w-full">
+      {/* Image Section - Optimized for mobile */}
+      <div className="relative h-56 sm:h-48 bg-gray-200 overflow-hidden">
         <img
           src={getImageUrl()}
           alt={salon.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          loading="lazy"
           referrerPolicy="no-referrer"
           crossOrigin="anonymous"
           onError={(e) => {
@@ -123,30 +124,33 @@ const SalonCard = ({ salon }) => {
               e.target.src,
             );
             e.target.onerror = null; // Prevent infinite loop
-            e.target.src = "https://placehold.co/400x300?text=Salon";
+            e.target.src =
+              "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=400&fit=crop";
           }}
         />
       </div>
 
-      {/* Content Section */}
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900 mb-2">{salon.name}</h3>
+      {/* Content Section - Mobile-first padding */}
+      <div className="p-4 sm:p-5">
+        <h3 className="text-xl sm:text-lg font-bold text-gray-900 mb-3 sm:mb-2 line-clamp-2">
+          {salon.name}
+        </h3>
 
-        <div className="flex items-center text-gray-500 text-sm mb-2">
-          <MapPin size={16} className="mr-1 flex-shrink-0" />
+        <div className="flex items-center text-gray-500 text-base sm:text-sm mb-2.5 sm:mb-2">
+          <MapPin size={18} className="mr-2 flex-shrink-0 text-primary-600" />
           <span className="truncate">
             {salon.city || "Ville non spécifiée"}
           </span>
         </div>
 
         {salon.phone && (
-          <div className="flex items-center text-gray-500 text-sm mb-3">
-            <Phone size={16} className="mr-1 flex-shrink-0" />
+          <div className="flex items-center text-gray-500 text-base sm:text-sm mb-3">
+            <Phone size={18} className="mr-2 flex-shrink-0 text-primary-600" />
             <span>{salon.phone}</span>
           </div>
         )}
 
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+        <p className="text-gray-600 text-base sm:text-sm mb-4 line-clamp-2">
           {salon.address || salon.description || "Adresse non spécifiée"}
         </p>
 
@@ -189,17 +193,17 @@ const SalonCard = ({ salon }) => {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="space-y-2">
+        {/* Action Buttons - Touch-friendly on mobile */}
+        <div className="space-y-3 sm:space-y-2">
           <button
             onClick={handleViewDetails}
-            className="w-full bg-white border-2 border-blue-600 text-blue-600 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+            className="w-full bg-white border-2 border-primary-600 text-primary-600 py-3.5 sm:py-2.5 rounded-xl sm:rounded-lg font-semibold hover:bg-primary-50 transition-all active:scale-98 min-h-[48px] text-base sm:text-sm"
           >
             Voir les détails
           </button>
           <button
             onClick={handleBookNow}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+            className="w-full bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-3.5 sm:py-2.5 rounded-xl sm:rounded-lg font-semibold hover:opacity-90 transition-all shadow-md hover:shadow-lg active:scale-98 min-h-[48px] text-base sm:text-sm"
           >
             Réserver maintenant
           </button>

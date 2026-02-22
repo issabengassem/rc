@@ -61,7 +61,21 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.message || "Email ou mot de passe incorrect");
+      const errorMessage = err.message || "Email ou mot de passe incorrect";
+
+      // Check if it's an email verification error
+      if (
+        errorMessage.includes("verify your email") ||
+        errorMessage.includes("vérifi")
+      ) {
+        setError(errorMessage);
+        // Optionally redirect to verification page
+        setTimeout(() => {
+          navigate("/verify-email", { state: { email: formData.email } });
+        }, 2000);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
