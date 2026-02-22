@@ -36,8 +36,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        // Allow requests from React frontend
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000"));
+        // Allow requests from React frontend (both production and development)
+        corsConfig.setAllowedOrigins(List.of(
+            "https://reservecut.me",
+            "http://localhost:3000"
+        ));
 
         // Allow all HTTP methods your frontend uses
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -71,16 +74,21 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(
-                                "/api/users/register", 
-                                "/api/users/login",
-                                "/api/users/verify-email",
-                                "/api/users/resend-code",
-                                "/api/files/**",
-                                "/api/salons/**",
-                                "/api/reviews/salon/**",
-                                "/api/reviews/check/**"
-                        ).permitAll()
+                        auth
+                                // Public endpoints - no authentication required
+                                .requestMatchers(
+                                        "/api/health",
+                                        "/api/auth/**",
+                                        "/api/users/register", 
+                                        "/api/users/login",
+                                        "/api/users/verify-email",
+                                        "/api/users/resend-code",
+                                        "/api/files/**",
+                                        "/api/salons/**",
+                                        "/api/reviews/salon/**",
+                                        "/api/reviews/check/**"
+                                ).permitAll()
+                                // All other endpoints require authentication
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
