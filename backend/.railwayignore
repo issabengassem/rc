@@ -1,0 +1,17 @@
+# Ignore local development files
+
+target/
+.mvn/
+.idea/
+_.iml
+_.iws
+\*.ipr
+
+# Ignore local uploads (use Railway volumes or external storage)
+
+uploads/
+
+# Ignore IDE specific files
+
+.vscode/
+.DS_Store

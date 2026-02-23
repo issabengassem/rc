@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -15,6 +16,12 @@ import java.util.UUID;
 public class FileStorageService {
 
     private final Path fileStorageLocation;
+    
+    @Value("${cloudinary.enabled:false}")
+    private boolean cloudinaryEnabled;
+
+    @Autowired(required = false)
+    private CloudinaryService cloudinaryService;
 
     public FileStorageService(@Value("${file.upload-dir:uploads/salons}") String uploadDir) {
         this.fileStorageLocation = Paths.get(uploadDir)
@@ -28,6 +35,16 @@ public class FileStorageService {
     }
 
     public String storeFile(MultipartFile file) {
+        // Use Cloudinary if enabled
+        if (cloudinaryEnabled && cloudinaryService != null) {
+            return cloudinaryService.uploadFile(file, "salons");
+        }
+        
+        // Otherwise use local storage
+        return storeFileLocally(file);
+    }
+    
+    private String storeFileLocally(MultipartFile file) {
         // Normalize file name
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
 
@@ -55,6 +72,13 @@ public class FileStorageService {
     }
 
     public void deleteFile(String fileName) {
+        // Use Cloudinary if enabled and fileName is a URL
+        if (cloudinaryEnabled && cloudinaryService != null && fileName != null && fileName.startsWith("http")) {
+            cloudinaryService.deleteFile(fileName);
+            return;
+        }
+        
+        // Otherwise delete from local storage
         try {
             Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
             Files.deleteIfExists(filePath);
