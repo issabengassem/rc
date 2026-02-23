@@ -1,6 +1,6 @@
 // API Service - Centralized backend communication
 // Base URL for all API calls
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "https://rc-production-3ae4.up.railway.app/api";
 
 // Helper function to get auth headers with JWT token
 const getAuthHeaders = () => {
