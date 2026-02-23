@@ -1,6 +1,7 @@
 package com.example.backend.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @EnableWebSecurity
@@ -31,16 +33,17 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Value("${allowed.origins}")
+    private String allowedOrigins;
+
     // ========== CORS CONFIGURATION ==========
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        // Allow requests from React frontend (both production and development)
-        corsConfig.setAllowedOrigins(List.of(
-            "https://reservecut.me",
-            "http://localhost:3000"
-        ));
+        // Allow requests from React frontend (read from environment variable)
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        corsConfig.setAllowedOrigins(origins);
 
         // Allow all HTTP methods your frontend uses
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
