@@ -255,8 +255,8 @@ const Home = () => {
             <div>
               <h5 className="font-semibold mb-4">Contact</h5>
               <ul className="space-y-2 text-gray-400">
-                <li>contact@reservecut.ma</li>
-                <li>+212 6XX XXX XXX</li>
+                <li>no-reply@admin.reservecut.me</li>
+                <li>+212 632 151 09</li>
               </ul>
             </div>
           </div>
