@@ -88,7 +88,7 @@ const SalonDashboard = () => {
         err.message.includes("NetworkError")
       ) {
         errorMessage =
-          "❌ Impossible de contacter le serveur. Vérifiez que le backend est lancé sur http://localhost:8080";
+          "❌ Impossible de contacter le serveur. Veuillez réessayer plus tard."; // FIXED: Removed hardcoded localhost URL from error message
       } else if (err.message.includes("404")) {
         errorMessage = `❌ Salon #${id} introuvable. Le salon a peut-être été supprimé.`;
       } else if (err.message.includes("401") || err.message.includes("403")) {

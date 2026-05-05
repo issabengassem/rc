@@ -100,6 +100,9 @@ const AppointmentDetail = () => {
     try {
       await appointmentService.cancelAppointment(id);
       toast.success("Rendez-vous annulé avec succès");
+      // Close the modal
+      setShowConfirmModal(false);
+      // Navigate back to appointments list
       navigate("/mes-rendez-vous");
     } catch (err) {
       toast.error("Erreur lors de l'annulation");

@@ -64,11 +64,13 @@ const Register = () => {
       console.log("User created:", result);
 
       toast.success(
-        "Compte créé avec succès! Vérifiez votre email pour le code de vérification.",
+        "Compte créé avec succès! Vous pouvez maintenant vous connecter.", // FIXED: Updated success message - no email verification needed
       );
 
-      // Redirect to verification page with email
-      navigate("/verify-email", { state: { email: formData.email } });
+      // FIXED: Redirect to login instead of verify-email - email verification system removed
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(

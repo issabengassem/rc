@@ -31,9 +31,14 @@ const TestConnection = () => {
     setTesting(true);
     setResults({});
 
+    // FIXED: Use configurable API URL for local development vs production
+    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8080/api'
+      : 'https://rc-production-3ae4.up.railway.app/api';
+
     // Test backend connection
     await testEndpoint("Backend Connection", async () => {
-      const response = await fetch("http://localhost:8080/api/salons");
+      const response = await fetch(`${baseUrl}/salons`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return "Connected";
     });

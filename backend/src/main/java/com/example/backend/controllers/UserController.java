@@ -64,40 +64,7 @@ public class UserController {
         }
     }
 
-    // Email Verification Endpoints
-    @PostMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailDTO verifyEmailDTO) {
-        try {
-            boolean verified = userService.verifyEmail(verifyEmailDTO.getEmail(), verifyEmailDTO.getVerificationCode());
-            return ResponseEntity.ok(new MessageResponse("Email verified successfully! You can now login."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ErrorResponseDto.builder()
-                                    .status(400)
-                                    .error("VERIFICATION_FAILED")
-                                    .message(e.getMessage())
-                                    .build()
-                    );
-        }
-    }
-
-    @PostMapping("/resend-code")
-    public ResponseEntity<?> resendVerificationCode(@RequestBody ResendCodeDTO resendCodeDTO) {
-        try {
-            userService.resendVerificationCode(resendCodeDTO.getEmail());
-            return ResponseEntity.ok(new MessageResponse("Verification code sent successfully!"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(
-                            ErrorResponseDto.builder()
-                                    .status(400)
-                                    .error("RESEND_FAILED")
-                                    .message(e.getMessage())
-                                    .build()
-                    );
-        }
-    }
+    // DELETED: Email Verification Endpoints - Email verification system removed
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(

@@ -16,6 +16,7 @@ import { salonService, serviceService } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
 import MapPicker from "../components/MapPicker";
+import { handleSalonImageError } from "../utils/imageUtils";
 
 function SalonEdit() {
   const { id } = useParams();
@@ -127,7 +128,7 @@ function SalonEdit() {
         error.message.includes("NetworkError")
       ) {
         errorMessage =
-          "❌ Impossible de contacter le serveur.\n\nVérifiez que:\n- Le backend est lancé (http://localhost:8080)\n- Il n'y a pas d'erreur CORS";
+          "❌ Impossible de contacter le serveur. Veuillez vérifier votre connexion et réessayer."; // FIXED: Removed hardcoded localhost URL
       } else if (error.message.includes("404")) {
         errorMessage = `❌ Salon #${id} introuvable.\n\nLe salon a peut-être été supprimé.`;
       } else if (
@@ -724,10 +725,8 @@ function SalonEdit() {
                     src={currentImage}
                     alt="Current salon"
                     className="w-64 h-48 object-cover rounded-lg border border-gray-200"
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/300x200?text=Image+non+disponible";
-                    }}
+                    referrerPolicy="no-referrer"
+                    onError={handleSalonImageError}
                   />
                   <button
                     type="button"

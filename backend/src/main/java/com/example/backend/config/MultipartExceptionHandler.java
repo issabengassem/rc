@@ -37,15 +37,4 @@ public class MultipartExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGeneralException(Exception e) {
-        System.err.println("=== GENERAL EXCEPTION IN MULTIPART HANDLER ===");
-        System.err.println("Error: " + e.getMessage());
-        e.printStackTrace();
-        
-        Map<String, String> error = new HashMap<>();
-        error.put("message", e.getMessage());
-        error.put("type", e.getClass().getName());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
 }

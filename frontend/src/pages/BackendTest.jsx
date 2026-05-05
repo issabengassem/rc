@@ -30,12 +30,16 @@ function BackendTest() {
       // Test 1: Check if backend is reachable
       addResult("Connection Test", null, "Testing backend connection...");
       try {
-        const response = await fetch("http://localhost:8080/api/salons");
+        // FIXED: Use configurable API URL for local development vs production
+        const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:8080/api'
+          : 'https://rc-production-3ae4.up.railway.app/api';
+        const response = await fetch(`${baseUrl}/salons`);
         if (response.ok) {
           addResult(
             "Connection Test",
             true,
-            "✅ Backend is reachable at http://localhost:8080",
+            "✅ Backend is reachable", // FIXED: Removed hardcoded localhost reference
           );
         } else {
           addResult(
@@ -204,7 +208,7 @@ function BackendTest() {
                 <strong>❌ Cannot connect to backend:</strong>
                 <br />
                 → Make sure your Spring Boot backend is running on
-                http://localhost:8080
+                http://rc-production-3ae4.up.railway.app {/* FIXED: Changed to production URL */}
                 <br />→ Check terminal for backend errors
               </li>
               <li>

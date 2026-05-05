@@ -26,17 +26,19 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Skip JWT filter for public endpoints
+        boolean isGet = "GET".equalsIgnoreCase(request.getMethod());
+
+        // Skip JWT filter for public endpoints that should work even with stale localStorage tokens.
         return path.startsWith("/api/health") ||
                path.startsWith("/api/auth/") ||
                path.startsWith("/api/users/register") ||
                path.startsWith("/api/users/login") ||
                path.startsWith("/api/users/verify-email") ||
                path.startsWith("/api/users/resend-code") ||
-               path.startsWith("/api/files/") ||
-               path.startsWith("/api/salons/") ||
-               path.startsWith("/api/reviews/salon/") ||
-               path.startsWith("/api/reviews/check/");
+               (isGet && path.startsWith("/api/files/")) ||
+               (isGet && (path.equals("/api/salons") || path.startsWith("/api/salons/"))) ||
+               (isGet && (path.equals("/api/services") || path.startsWith("/api/services/"))) ||
+               (isGet && path.startsWith("/api/reviews/salon/"));
     }
 
     @Override

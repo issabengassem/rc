@@ -51,7 +51,7 @@ const UserProfile = () => {
       // Check if it's a network/CORS error
       if (error.message === "Failed to fetch") {
         toast.error(
-          "Impossible de se connecter au serveur. Vérifiez que le backend est démarré sur http://localhost:8080",
+          "Impossible de se connecter au serveur. Veuillez vérifier votre connexion.", // FIXED: Removed hardcoded localhost URL
         );
       } else if (error.message.includes("Session expirée")) {
         // Token expired - handleResponse will redirect to login
@@ -90,6 +90,26 @@ const UserProfile = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // ENDPOINT USED: deleteUser()
+  const handlePhoneChange = (e) => {
+    let value = e.target.value;
+    
+    // Only allow digits, +, and spaces for formatting
+    value = value.replace(/[^\d+\s]/g, '');
+    
+    // Limit to reasonable length (international format)
+    if (value.length > 15) {
+      value = value.substring(0, 15);
+    }
+    
+    // Validate format: must start with + or be digits only
+    if (value && !value.match(/^(\+\d{0,15}|\d{0,15})$/)) {
+      return; // Don't update if invalid
+    }
+    
+    setFormData({ ...formData, phone: value });
   };
 
   // ENDPOINT USED: deleteUser()
@@ -296,13 +316,16 @@ const UserProfile = () => {
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
+                    onChange={handlePhoneChange}
+                    placeholder="Ex: +212632151409 ou 0632151409"
+                    pattern="^\+?[0-9]{10,15}$"
                     className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow"
                     style={{ fontSize: "16px" }}
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Format: +212632151409 ou 0632151409 (chiffres uniquement)
+                  </p>
                 </div>
 
                 {/* Action Buttons - Stack on Mobile, Side-by-Side on Desktop */}

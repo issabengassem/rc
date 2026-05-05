@@ -20,13 +20,7 @@ public class CloudinaryService {
 
     public String uploadFile(MultipartFile file, String folder) {
         try {
-            // Generate unique filename
-            String originalFileName = file.getOriginalFilename();
-            String fileExtension = "";
-            if (originalFileName != null && originalFileName.contains(".")) {
-                fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            }
-            String publicId = folder + "/" + UUID.randomUUID().toString();
+            String publicId = UUID.randomUUID().toString();
 
             // Upload to Cloudinary
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),

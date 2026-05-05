@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -85,9 +86,14 @@ public class SecurityConfig {
                                         "/api/users/register", 
                                         "/api/users/login",
                                         "/api/users/verify-email",
-                                        "/api/users/resend-code",
+                                        "/api/users/resend-code"
+                                ).permitAll()
+                                .requestMatchers(HttpMethod.GET,
                                         "/api/files/**",
+                                        "/api/salons",
                                         "/api/salons/**",
+                                        "/api/services",
+                                        "/api/services/**",
                                         "/api/reviews/salon/**",
                                         "/api/reviews/check/**"
                                 ).permitAll()

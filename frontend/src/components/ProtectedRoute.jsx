@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { authService } from "../services/apiService";
 
 /**
@@ -16,12 +16,16 @@ import { authService } from "../services/apiService";
  * </ProtectedRoute>
  */
 const ProtectedRoute = ({ children, requiredRole = null }) => {
+  const location = useLocation();
   const isAuthenticated = authService.isAuthenticated();
   const currentUser = authService.getCurrentUser();
 
   // Check if user is authenticated
   if (!isAuthenticated || !currentUser) {
-    return <Navigate to="/login" replace />;
+    const redirect = encodeURIComponent(
+      `${location.pathname}${location.search}`,
+    );
+    return <Navigate to={`/login?redirect=${redirect}`} replace />;
   }
 
   // Check if role is required and matches

@@ -1,6 +1,39 @@
 // API Service - Centralized backend communication
-// Base URL for all API calls
-const API_BASE_URL = "https://rc-production-3ae4.up.railway.app/api";
+import { resolveImageUrl } from "../utils/imageUtils";
+
+// Base URL for all API calls - FIXED: Made configurable for local development vs production
+const getApiBaseUrl = () => {
+  // FIXED: Check if running on localhost for development
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return "http://localhost:8080/api"; // Local development backend
+  }
+  // Production backend
+  return "https://rc-production-3ae4.up.railway.app/api";
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Normalize duration helper: if backend sent seconds (large numbers), convert to minutes
+const normalizeDurationValue = (d) => {
+  if (d == null) return null;
+  const n = Number(d);
+  if (Number.isNaN(n)) return d;
+  // If value > 600, assume it's seconds and convert to minutes
+  return n > 600 ? Math.round(n / 60) : n;
+};
+
+const normalizeServiceObject = (s) => {
+  if (!s) return s;
+  return {
+    ...s,
+    durationMinutes:
+      normalizeDurationValue(s.durationMinutes) ?? s.durationMinutes,
+  };
+};
+
+const getPublicHeaders = () => ({
+  Accept: "application/json",
+});
 
 // Helper function to get auth headers with JWT token
 const getAuthHeaders = () => {
@@ -20,7 +53,7 @@ const handleResponse = async (response) => {
     "Response headers:",
     Object.fromEntries(response.headers.entries()),
   );
-
+  // Robust error handling: read text first (response.json() may fail on empty body)
   if (!response.ok) {
     // Handle 401 Unauthorized - token invalid or expired
     if (response.status === 401) {
@@ -30,32 +63,53 @@ const handleResponse = async (response) => {
       throw new Error("Session expirée. Veuillez vous reconnecter.");
     }
 
-    // Try to get error message from response
     let errorMessage = `HTTP error! status: ${response.status}`;
     try {
-      const errorData = await response.json();
-      console.log("Error data from backend:", errorData);
-      errorMessage = errorData.message || errorData.error || errorMessage;
-    } catch (parseError) {
-      console.error("Failed to parse error response:", parseError);
-      // Try to get text instead
-      try {
-        const textResponse = await response.text();
-        console.log("Error response as text:", textResponse);
-        if (textResponse) {
+      const textResponse = await response.text();
+      console.log("Error response as text:", textResponse);
+      if (textResponse) {
+        try {
+          const errorData = JSON.parse(textResponse);
+          console.log("Error data from backend:", errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (jsonParseErr) {
+          // Not JSON, use raw text
           errorMessage = textResponse;
         }
-      } catch (textError) {
-        console.error("Failed to get text response:", textError);
       }
+    } catch (readErr) {
+      console.error("Failed to read error response:", readErr);
+    }
+
+    // Provide a clearer message for 403 if backend provided nothing useful
+    if (response.status === 403 && !errorMessage) {
+      errorMessage =
+        "Erreur d'authentification (403). Vérifiez que vous êtes connecté et que votre token est valide.";
     }
 
     throw new Error(errorMessage);
   }
 
-  const data = await response.json();
-  console.log("Success response data:", data);
-  return data;
+  // success path: read text then try to parse JSON (some endpoints may return empty body)
+  try {
+    const text = await response.text();
+    if (!text) {
+      console.log("Success response: empty body");
+      return null;
+    }
+    try {
+      const data = JSON.parse(text);
+      console.log("Success response data:", data);
+      return data;
+    } catch (parseErr) {
+      // Not JSON, return raw text
+      console.log("Success response is not JSON, returning text");
+      return text;
+    }
+  } catch (err) {
+    console.error("Failed to read success response:", err);
+    throw err;
+  }
 };
 
 // ==================== AUTHENTICATION ENDPOINTS ====================
@@ -104,43 +158,7 @@ export const authService = {
     return localStorage.getItem("accessToken");
   },
 
-  // Verify email with code
-  verifyEmail: async (email, verificationCode) => {
-    console.log("=== API SERVICE: verifyEmail ===");
-    console.log("Request URL:", `${API_BASE_URL}/users/verify-email`);
-    console.log("Request Body:", { email, verificationCode });
-
-    const response = await fetch(`${API_BASE_URL}/users/verify-email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, verificationCode }),
-    });
-
-    console.log("Response status:", response.status);
-    console.log("Response ok:", response.ok);
-
-    const result = await handleResponse(response);
-    console.log("Parsed result:", result);
-    return result;
-  },
-
-  // Resend verification code
-  resendVerificationCode: async (email) => {
-    console.log("=== API SERVICE: resendVerificationCode ===");
-    console.log("Request URL:", `${API_BASE_URL}/users/resend-code`);
-    console.log("Request Body:", { email });
-
-    const response = await fetch(`${API_BASE_URL}/users/resend-code`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-
-    console.log("Response status:", response.status);
-    const result = await handleResponse(response);
-    console.log("Parsed result:", result);
-    return result;
-  },
+  // DELETED: Email verification API methods (verifyEmail, resendVerificationCode) - email verification system removed
 };
 
 // ==================== USER ENDPOINTS ====================
@@ -217,6 +235,9 @@ export const salonService = {
   // Step 1: Create salon with JSON, Step 2: Upload image separately
   // This avoids Tomcat multipart file count limit issues
   createSalon: async (salonData, imageFile) => {
+    console.log("Creating salon with data:", salonData);
+    console.log("Image file:", imageFile);
+
     // Step 1: Create salon without image (using JSON - no multipart issues)
     const response = await fetch(`${API_BASE_URL}/salons`, {
       method: "POST",
@@ -236,14 +257,17 @@ export const salonService = {
     });
 
     const createdSalon = await handleResponse(response);
+    console.log("Salon created successfully:", createdSalon);
 
     // Step 2: Upload image if provided (only 1 file = no multipart limit issues)
     if (imageFile) {
       try {
+        console.log("Uploading image for salon ID:", createdSalon.id);
         const updatedSalon = await salonService.uploadSalonImage(
           createdSalon.id,
           imageFile,
         );
+        console.log("Image uploaded successfully");
         return updatedSalon;
       } catch (error) {
         console.warn("Image upload failed, but salon was created:", error);
@@ -258,7 +282,7 @@ export const salonService = {
   // Get all salons
   getAllSalons: async () => {
     const response = await fetch(`${API_BASE_URL}/salons`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
     return handleResponse(response);
   },
@@ -266,7 +290,7 @@ export const salonService = {
   // Get salon by ID
   getSalonById: async (salonId) => {
     const response = await fetch(`${API_BASE_URL}/salons/${salonId}`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
     return handleResponse(response);
   },
@@ -293,7 +317,7 @@ export const salonService = {
   // Get salons by city
   getSalonsByCity: async (city) => {
     const response = await fetch(`${API_BASE_URL}/salons/city/${city}`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
     return handleResponse(response);
   },
@@ -311,7 +335,7 @@ export const salonService = {
     const response = await fetch(
       `${API_BASE_URL}/salons/search?name=${encodeURIComponent(name)}`,
       {
-        headers: getAuthHeaders(),
+        headers: getPublicHeaders(),
       },
     );
     return handleResponse(response);
@@ -331,7 +355,7 @@ export const salonService = {
       : `${API_BASE_URL}/salons`;
 
     const response = await fetch(url, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
     return handleResponse(response);
   },
@@ -342,19 +366,32 @@ export const salonService = {
     formData.append("image", imageFile);
 
     const token = localStorage.getItem("accessToken");
+    console.log("Uploading image - Token present:", !!token);
+    console.log("Salon ID:", salonId);
+    console.log("Image file:", imageFile.name, imageFile.size, imageFile.type);
+
     const headers = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+    // IMPORTANT: Do NOT set Content-Type header for FormData
+    // The browser will automatically set it with the correct boundary
     const response = await fetch(
       `${API_BASE_URL}/salons/${salonId}/upload-image`,
       {
         method: "POST",
-        headers: headers,
+        headers: headers, // This will NOT include Content-Type - browser sets it
         body: formData,
       },
     );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Upload response:", response.status, errorText);
+      throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+    }
+
     return handleResponse(response);
   },
 
@@ -382,13 +419,18 @@ export const salonService = {
 
   // Get image URL
   getImageUrl: (imagePath) => {
-    if (!imagePath) return null;
-    // If it's already a full URL, return it as is
-    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
-      return imagePath;
-    }
-    // Otherwise, construct the full URL for the local file
-    return `http://localhost:8080/api/files/salons/${imagePath}`;
+    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8080'
+      : 'https://rc-production-3ae4.up.railway.app';
+
+    const buildExternalImageProxyUrl = (url) =>
+      `${baseUrl}/api/files/external-image?url=${encodeURIComponent(url)}`;
+
+    return resolveImageUrl(
+      imagePath,
+      (localPath) => `${baseUrl}/api/files/salons/${localPath}`,
+      buildExternalImageProxyUrl,
+    );
   },
 };
 
@@ -414,17 +456,20 @@ export const serviceService = {
   // Get all services
   getAllServices: async () => {
     const response = await fetch(`${API_BASE_URL}/services`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    if (Array.isArray(data)) return data.map(normalizeServiceObject);
+    return data;
   },
 
   // Get service by ID
   getServiceById: async (serviceId) => {
     const response = await fetch(`${API_BASE_URL}/services/${serviceId}`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return normalizeServiceObject(data);
   },
 
   // Update service
@@ -449,9 +494,11 @@ export const serviceService = {
   // Get services by salon
   getServicesBySalon: async (salonId) => {
     const response = await fetch(`${API_BASE_URL}/services/salon/${salonId}`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    if (Array.isArray(data)) return data.map(normalizeServiceObject);
+    return data;
   },
 
   // Get services by max price
@@ -459,7 +506,7 @@ export const serviceService = {
     const response = await fetch(
       `${API_BASE_URL}/services/price?maxPrice=${maxPrice}`,
       {
-        headers: getAuthHeaders(),
+        headers: getPublicHeaders(),
       },
     );
     return handleResponse(response);
@@ -617,7 +664,24 @@ export const appointmentService = {
     const response = await fetch(url, {
       headers: getAuthHeaders(),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    // Normalize reservation service durations if present
+    if (Array.isArray(data)) {
+      return data.map((apt) => {
+        const normalized = { ...apt };
+        if (normalized.service) {
+          normalized.service = normalizeServiceObject(normalized.service);
+        }
+        // Normalize any top-level serviceDuration field
+        if (normalized.serviceDuration != null) {
+          normalized.serviceDuration = normalizeDurationValue(
+            normalized.serviceDuration,
+          );
+        }
+        return normalized;
+      });
+    }
+    return data;
   },
 };
 

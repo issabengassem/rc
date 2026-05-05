@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { authService } from "../services/apiService";
 import { AlertCircle } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -51,6 +52,12 @@ const Login = () => {
       localStorage.setItem("accessToken", response.accessToken);
       localStorage.setItem("user", JSON.stringify(response.user));
 
+      const redirectTo = searchParams.get("redirect");
+      if (redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")) {
+        navigate(redirectTo);
+        return;
+      }
+
       // Redirect based on user role
       if (response.user.role === "CLIENT") {
         navigate("/salons");
@@ -61,21 +68,8 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      const errorMessage = err.message || "Email ou mot de passe incorrect";
-
-      // Check if it's an email verification error
-      if (
-        errorMessage.includes("verify your email") ||
-        errorMessage.includes("vérifi")
-      ) {
-        setError(errorMessage);
-        // Optionally redirect to verification page
-        setTimeout(() => {
-          navigate("/verify-email", { state: { email: formData.email } });
-        }, 2000);
-      } else {
-        setError(errorMessage);
-      }
+      const errorMessage = err.message || "Email ou mot de passe incorrect"; // FIXED: Removed email verification error handling
+      setError(errorMessage); // FIXED: Removed email verification redirect
     } finally {
       setLoading(false);
     }

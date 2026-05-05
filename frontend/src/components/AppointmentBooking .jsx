@@ -7,6 +7,7 @@ import {
   appointmentService,
 } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
+import { handleSalonImageError } from "../utils/imageUtils";
 
 const AppointmentBooking = () => {
   const { salonId } = useParams();
@@ -145,6 +146,8 @@ const AppointmentBooking = () => {
                 src={salonService.getImageUrl(salon.imagePath)}
                 alt={salon.name}
                 className="w-32 h-32 rounded-xl object-cover"
+                referrerPolicy="no-referrer"
+                onError={handleSalonImageError}
               />
             )}
             <div className="flex-1">

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { salonService, reviewService } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
+import { handleSalonImageError } from "../utils/imageUtils";
 
 const SalonExplorerEnhanced = () => {
   const navigate = useNavigate();
@@ -71,9 +72,7 @@ const SalonExplorerEnhanced = () => {
             const stats = await reviewService.getSalonRatingStats(salon.id);
             return {
               ...salon,
-              displayImage: salon.imagePath
-                ? salonService.getImageUrl(salon.imagePath)
-                : "https://placehold.co/400x300?text=No+Image",
+              displayImage: salonService.getImageUrl(salon.imagePath),
               averageRating: stats.averageRating || 0,
               totalReviews: stats.totalReviews || 0,
             };
@@ -81,9 +80,7 @@ const SalonExplorerEnhanced = () => {
             // If review stats fail, continue without ratings
             return {
               ...salon,
-              displayImage: salon.imagePath
-                ? salonService.getImageUrl(salon.imagePath)
-                : "https://placehold.co/400x300?text=No+Image",
+              displayImage: salonService.getImageUrl(salon.imagePath),
               averageRating: 0,
               totalReviews: 0,
             };
@@ -133,18 +130,14 @@ const SalonExplorerEnhanced = () => {
             const stats = await reviewService.getSalonRatingStats(salon.id);
             return {
               ...salon,
-              displayImage: salon.imagePath
-                ? salonService.getImageUrl(salon.imagePath)
-                : "https://placehold.co/400x300?text=No+Image",
+              displayImage: salonService.getImageUrl(salon.imagePath),
               averageRating: stats.averageRating || 0,
               totalReviews: stats.totalReviews || 0,
             };
           } catch (error) {
             return {
               ...salon,
-              displayImage: salon.imagePath
-                ? salonService.getImageUrl(salon.imagePath)
-                : "https://placehold.co/400x300?text=No+Image",
+              displayImage: salonService.getImageUrl(salon.imagePath),
               averageRating: 0,
               totalReviews: 0,
             };
@@ -200,18 +193,14 @@ const SalonExplorerEnhanced = () => {
             const stats = await reviewService.getSalonRatingStats(salon.id);
             return {
               ...salon,
-              displayImage: salon.imagePath
-                ? salonService.getImageUrl(salon.imagePath)
-                : "https://placehold.co/400x300?text=No+Image",
+              displayImage: salonService.getImageUrl(salon.imagePath),
               averageRating: stats.averageRating || 0,
               totalReviews: stats.totalReviews || 0,
             };
           } catch (error) {
             return {
               ...salon,
-              displayImage: salon.imagePath
-                ? salonService.getImageUrl(salon.imagePath)
-                : "https://placehold.co/400x300?text=No+Image",
+              displayImage: salonService.getImageUrl(salon.imagePath),
               averageRating: 0,
               totalReviews: 0,
             };
@@ -466,18 +455,8 @@ const SalonExplorerEnhanced = () => {
                   src={salon.displayImage}
                   alt={salon.name}
                   className="w-full h-full object-cover"
-                  crossOrigin="anonymous"
-                  onError={(e) => {
-                    console.error(
-                      "Failed to load image for salon:",
-                      salon.name,
-                      "URL:",
-                      e.target.src,
-                    );
-                    e.target.onerror = null; // Prevent infinite loop
-                    e.target.src =
-                      "https://placehold.co/400x300?text=Error+Image";
-                  }}
+                  referrerPolicy="no-referrer"
+                  onError={handleSalonImageError}
                 />
                 <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2 rounded-full cursor-pointer hover:bg-white transition-colors">
                   <Heart size={18} className="text-gray-600" />

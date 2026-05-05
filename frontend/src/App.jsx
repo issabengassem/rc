@@ -13,7 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/login";
 import Register from "./pages/Register";
-import VerifyEmail from "./pages/VerifyEmail";
+// DELETED: import VerifyEmail from "./pages/VerifyEmail"; - email verification system removed
 import SalonRegistration from "./pages/SalonRegistration";
 import MyAppointments from "./pages/MyAppointments";
 
@@ -37,23 +37,19 @@ function App() {
       <Router>
         <NavBar />
         <Routes>
+          {/* FIXED: Salons page moved to home route - salons section appears first when opening website */}
           {/* Public Pages - No Authentication Required */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Salons />} /> {/* FIXED: Changed from Home to Salons */}
+          <Route path="/home" element={<Home />} /> {/* FIXED: Moved original home page to /home for backward compatibility */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+          {/* DELETED: <Route path="/verify-email" element={<VerifyEmail />} /> - email verification system removed */}
 
           {/* Protected Pages - Authentication Required */}
 
           {/* Salon Exploration */}
-          <Route
-            path="/salons"
-            element={
-              <ProtectedRoute>
-                <Salons />
-              </ProtectedRoute>
-            }
-          />
+          {/* FIXED: Removed ProtectedRoute from /salons - salons page is now public */}
+          <Route path="/salons" element={<Salons />} />
 
           {/* Alternative route for old salon explorer (if needed) */}
           <Route

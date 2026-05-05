@@ -239,8 +239,11 @@ public class SalonService {
         dto.setDescription(salon.getDescription());
         dto.setOpeningTime(salon.getOpeningTime().toString());
         dto.setClosingTime(salon.getClosingTime().toString());
-        dto.setOwnerId(salon.getOwner().getId());
-        dto.setOwnerName(salon.getOwner().getName());
+        // Handle null owner (salons without owners are displayed)
+        if (salon.getOwner() != null) {
+            dto.setOwnerId(salon.getOwner().getId());
+            dto.setOwnerName(salon.getOwner().getName());
+        }
         dto.setImagePath(salon.getImagePath());
         dto.setLatitude(salon.getLatitude());
         dto.setLongitude(salon.getLongitude());

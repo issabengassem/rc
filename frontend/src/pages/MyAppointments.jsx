@@ -72,6 +72,9 @@ const MyAppointments = () => {
       await appointmentService.cancelAppointment(confirmModal.appointmentId);
       toast.success("Rendez-vous annulé avec succès");
 
+      // Close the modal
+      setConfirmModal({ isOpen: false, appointmentId: null, details: null });
+
       // Refresh appointments list
       fetchAppointments();
     } catch (error) {

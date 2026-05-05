@@ -121,7 +121,8 @@ const BookAppointment = () => {
       // Transform to include service duration
       const reservationsWithDuration = activeReservations.map((apt) => ({
         ...apt,
-        serviceDuration: apt.service?.durationMinutes || 60,
+        serviceDuration:
+          apt.service?.durationMinutes || apt.serviceDuration || 60,
       }));
 
       setReservations(reservationsWithDuration);
@@ -209,18 +210,36 @@ const BookAppointment = () => {
         return; // Stop submission
       }
 
-      // Both CLIENT and OWNER book for themselves
+      // Ensure we have a valid token before calling protected endpoints
+      const token = authService.getToken();
+      if (!token) {
+        toast.error("Vous devez être connecté pour réserver");
+        navigate("/login");
+        return;
+      }
+
+      // Prepare appointment data
       const appointmentData = {
         salonId: parseInt(salonId),
         serviceId: parseInt(formData.serviceId),
         appointmentDateTime: appointmentDateTime,
         notes: formData.notes || "",
-        // clientId auto-assigned by backend from JWT
       };
 
       console.log("Booking appointment:", appointmentData);
-      const newAppointment =
-        await appointmentService.createAppointment(appointmentData);
+      let newAppointment;
+      // If the logged-in user is an OWNER, use the owner-create endpoint
+      if (isOwner) {
+        appointmentData.clientId = user.id; // owner creating for themselves
+        newAppointment = await appointmentService.createAppointmentForClient(
+          appointmentData,
+        );
+      } else {
+        // CLIENT books for themselves
+        newAppointment = await appointmentService.createAppointment(
+          appointmentData,
+        );
+      }
 
       toast.success("Rendez-vous réservé avec succès!");
 

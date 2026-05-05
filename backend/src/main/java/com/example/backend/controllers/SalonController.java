@@ -33,54 +33,6 @@ public class SalonController {
                 .body(salonService.createSalon(salonDTO));
     }
 
-    // CHANGED: New endpoint to create salon with image in one request
-    @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<SalonDTO> createSalonWithImage(
-            @RequestParam("name") @jakarta.validation.constraints.NotBlank(message = "Name is required") String name,
-            @RequestParam("address") @jakarta.validation.constraints.NotBlank(message = "Address is required") String address,
-            @RequestParam("city") @jakarta.validation.constraints.NotBlank(message = "City is required") String city,
-            @RequestParam("phone") @jakarta.validation.constraints.NotBlank(message = "Phone is required") String phone,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam("openingTime") @jakarta.validation.constraints.NotBlank(message = "Opening time is required") String openingTime,
-            @RequestParam("closingTime") @jakarta.validation.constraints.NotBlank(message = "Closing time is required") String closingTime,
-            @RequestParam("ownerId") @jakarta.validation.constraints.NotNull(message = "Owner ID is required") Long ownerId,
-            @RequestParam(value = "latitude", required = false) Double latitude,
-            @RequestParam(value = "longitude", required = false) Double longitude,
-            @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile image) {
-
-        // DEBUG: Log received parameters
-        System.out.println("=== Received Salon Creation Request ===");
-        System.out.println("Name: " + name);
-        System.out.println("City: " + city);
-        System.out.println("Owner ID: " + ownerId);
-        System.out.println("Latitude: " + latitude);
-        System.out.println("Longitude: " + longitude);
-        if (image != null && !image.isEmpty()) {
-            System.out.println("Image received: " + image.getOriginalFilename() + 
-                             " (size: " + image.getSize() + " bytes, type: " + image.getContentType() + ")");
-        } else {
-            System.out.println("No image received");
-        }
-
-        // Build DTO from form parameters
-        SalonDTO salonDTO = new SalonDTO();
-        salonDTO.setName(name);
-        salonDTO.setAddress(address);
-        salonDTO.setCity(city);
-        salonDTO.setPhone(phone);
-        salonDTO.setDescription(description);
-        salonDTO.setOpeningTime(openingTime);
-        salonDTO.setClosingTime(closingTime);
-        salonDTO.setOwnerId(ownerId);
-        salonDTO.setLatitude(latitude);
-        salonDTO.setLongitude(longitude);
-
-        // CHANGED: Create salon with image if provided
-        SalonDTO createdSalon = salonService.createSalonWithImage(salonDTO, image);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdSalon);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<SalonDTO> updateSalon(
             @PathVariable Long id,

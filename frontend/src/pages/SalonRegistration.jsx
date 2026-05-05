@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Camera,
@@ -13,7 +13,7 @@ import {
   DollarSign,
   Clock,
 } from "lucide-react";
-import { salonService, serviceService } from "../services/apiService"; // Import API services
+import { salonService, serviceService, authService } from "../services/apiService"; // Import API services
 import { useToast } from "../contexts/ToastContext";
 import MapPicker from "../components/MapPicker";
 
@@ -35,6 +35,25 @@ const SalonRegistration = () => {
     latitude: null,
     longitude: null,
   });
+
+  // Check if user is logged in as OWNER
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    console.log("Current user:", user);
+    const token = authService.getToken();
+
+    if (!user.id || !token) {
+      toast.error("Vous devez être connecté pour créer un salon");
+      navigate("/login");
+      return;
+    }
+
+    if (user.role !== "OWNER") {
+      toast.error("Seuls les propriétaires peuvent créer un salon");
+      navigate("/");
+      return;
+    }
+  }, [navigate, toast]);
 
   // Services are now managed separately as an array of objects
   const [services, setServices] = useState([
@@ -227,10 +246,21 @@ const SalonRegistration = () => {
       // Navigate to My Salons page to see the new salon
       navigate("/mes-salons");
     } catch (error) {
-      console.error("Erreur:", error);
-      toast.error(
-        `Erreur: ${error.message}. Vérifiez que le backend est démarré (port 8080), un propriétaire avec ID=1 existe, et tous les champs sont valides`,
-      );
+      console.error("Erreur complète:", error);
+      console.error("Error message:", error.message);
+      
+      // Provide more specific error messages
+      let errorMessage = error.message || "Une erreur inconnue s'est produite";
+      
+      if (error.message.includes("403")) {
+        errorMessage = "Erreur d'authentification (403). Vérifiez que vous êtes connecté en tant que propriétaire et que votre token est valide.";
+      } else if (error.message.includes("404")) {
+        errorMessage = "Le serveur a rejeté la requête (404). Vérifiez que tous les champs sont remplis correctement.";
+      } else if (error.message.includes("Owner not found")) {
+        errorMessage = "Propriétaire non trouvé. Vérifiez que vous êtes connecté avec un compte propriétaire valide.";
+      }
+      
+      toast.error(`Erreur: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

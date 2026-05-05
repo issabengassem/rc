@@ -35,6 +35,13 @@ public class AppointmentController {
                 .body(appointmentService.createAppointment(appointmentDTO));
     }
 
+    @PostMapping("/owner-create")
+    public ResponseEntity<AppointmentDTO> createAppointmentForClient(
+            @Valid @RequestBody AppointmentDTO appointmentDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(appointmentService.createAppointment(appointmentDTO));
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<AppointmentDTO> updateAppointmentStatus(
             @PathVariable Long id,

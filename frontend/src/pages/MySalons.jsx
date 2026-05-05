@@ -13,6 +13,7 @@ import {
 import { salonService, reviewService } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
+import { handleSalonImageError } from "../utils/imageUtils";
 
 function MySalons() {
   const navigate = useNavigate();
@@ -67,9 +68,7 @@ function MySalons() {
       // Add image URLs and fetch review stats
       const salonsWithImagesAndRatings = await Promise.all(
         data.map(async (salon) => {
-          const imageUrl = salon.imagePath
-            ? salonService.getImageUrl(salon.imagePath)
-            : "https://placehold.co/400x300?text=No+Image";
+          const imageUrl = salonService.getImageUrl(salon.imagePath);
 
           // Fetch review statistics
           let averageRating = 0;
@@ -113,6 +112,8 @@ function MySalons() {
     try {
       await salonService.deleteSalon(salonId);
       toast.success("Salon supprimé avec succès");
+      // Close confirmation modal and refresh the list
+      setConfirmModal({ isOpen: false, salonId: null, salonName: null });
       fetchOwnerSalons(); // Refresh the list
     } catch (error) {
       console.error("Error deleting salon:", error);
@@ -222,18 +223,8 @@ function MySalons() {
                     src={salon.displayImage}
                     alt={salon.name}
                     className="w-full h-full object-cover"
-                    crossOrigin="anonymous"
-                    onError={(e) => {
-                      console.error(
-                        "Failed to load image for salon:",
-                        salon.name,
-                        "URL:",
-                        e.target.src,
-                      );
-                      e.target.onerror = null; // Prevent infinite loop
-                      e.target.src =
-                        "https://placehold.co/400x300?text=Error+Loading+Image";
-                    }}
+                    referrerPolicy="no-referrer"
+                    onError={handleSalonImageError}
                   />
                 </div>
 

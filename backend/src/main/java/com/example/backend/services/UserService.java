@@ -63,23 +63,11 @@ public class UserService {
         }
         User user = convertToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEmailVerified(false); // Set email as not verified
-        
-        // Generate and send verification code
-        String verificationCode = generateVerificationCode();
-        user.setVerificationCode(verificationCode);
-        user.setVerificationCodeExpiry(LocalDateTime.now().plusMinutes(codeExpiryMinutes));
+        user.setEmailVerified(true); // FIXED: Email verification removed - all users are automatically verified
+        // DELETED: Email verification code generation and sending
         
         User savedUser = userRepository.save(user);
-        
-        // Send verification email
-        try {
-            emailService.sendVerificationEmail(user.getEmail(), verificationCode);
-        } catch (Exception e) {
-            System.err.println("Failed to send verification email: " + e.getMessage());
-            // Don't fail registration if email fails, user can resend
-        }
-        
+        // DELETED: Email sending code
         return convertToDTO(savedUser);
     }
 
@@ -90,10 +78,7 @@ public class UserService {
             return null;
         }
         
-        // Check if email is verified
-        if (!user.isEmailVerified()) {
-            throw new RuntimeException("Please verify your email first. Check your inbox for the verification code.");
-        }
+        // DELETED: Email verification check - no longer required
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -167,62 +152,5 @@ public class UserService {
         return user;
     }
     
-    // ==================== VERIFICATION METHODS ====================
-    
-    private String generateVerificationCode() {
-        Random random = new Random();
-        int code = 100000 + random.nextInt(900000); // Generates 6-digit number
-        return String.valueOf(code);
-    }
-    
-    public boolean verifyEmail(String email, String code) {
-        User user = userRepository.findByEmailIgnoreCase(email);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
-        
-        if (user.isEmailVerified()) {
-            throw new RuntimeException("Email already verified");
-        }
-        
-        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(code)) {
-            throw new RuntimeException("Invalid verification code");
-        }
-        
-        if (user.getVerificationCodeExpiry() == null || LocalDateTime.now().isAfter(user.getVerificationCodeExpiry())) {
-            throw new RuntimeException("Verification code has expired. Please request a new one.");
-        }
-        
-        // Verification successful
-        user.setEmailVerified(true);
-        user.setVerificationCode(null);
-        user.setVerificationCodeExpiry(null);
-        userRepository.save(user);
-        
-        return true;
-    }
-    
-    public void resendVerificationCode(String email) {
-        User user = userRepository.findByEmailIgnoreCase(email);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
-        
-        if (user.isEmailVerified()) {
-            throw new RuntimeException("Email already verified");
-        }
-        
-        // Generate new code
-        String verificationCode = generateVerificationCode();
-        user.setVerificationCode(verificationCode);
-        user.setVerificationCodeExpiry(LocalDateTime.now().plusMinutes(codeExpiryMinutes));
-        userRepository.save(user);
-        
-        // Send email
-        try {
-            emailService.sendVerificationEmail(user.getEmail(), verificationCode);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to send verification email: " + e.getMessage());
-        }
-    }
+    // DELETED: Email verification methods (verifyEmail, resendVerificationCode, generateVerificationCode) - email verification system removed
 }

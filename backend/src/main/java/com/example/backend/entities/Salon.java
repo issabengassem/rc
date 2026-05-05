@@ -40,7 +40,7 @@ public class Salon {
     @Column(name = "closing_time", nullable = false)
     private LocalTime closingTime;
 
-    @Column(name = "image_path")
+    @Column(name = "image_path", length = 2048)
     private String imagePath;
 
     @Column(name = "latitude")
@@ -51,7 +51,7 @@ public class Salon {
 
     // Relationships
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = true)
     private User owner;
 
     @OneToMany(mappedBy = "salon", cascade = CascadeType.ALL)

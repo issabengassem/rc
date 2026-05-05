@@ -6,14 +6,14 @@ import {
   Phone,
   ChevronLeft,
   Calendar,
-  Star,
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { salonService } from "../services/apiService";
+import { salonService, serviceService } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
 import ReviewsList from "../components/ReviewsList";
+import { handleSalonImageError } from "../utils/imageUtils";
 
 // Fix Leaflet default marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -39,13 +39,19 @@ const SalonDetail = () => {
     try {
       setLoading(true);
       const data = await salonService.getSalonById(id);
+      let servicesData = [];
+
+      try {
+        servicesData = await serviceService.getServicesBySalon(id);
+      } catch (serviceError) {
+        console.warn("Could not load salon services:", serviceError);
+      }
 
       // Add image URL
       const salonWithImage = {
         ...data,
-        displayImage: data.imagePath
-          ? salonService.getImageUrl(data.imagePath)
-          : "https://placehold.co/800x400?text=No+Image",
+        services: servicesData,
+        displayImage: salonService.getImageUrl(data.imagePath),
       };
 
       setSalon(salonWithImage);
@@ -63,7 +69,9 @@ const SalonDetail = () => {
 
     if (!user.id) {
       showToast("Veuillez vous connecter pour réserver", "warning");
-      navigate("/login");
+      navigate(
+        `/login?redirect=${encodeURIComponent(`/rendez-vous/new?salonId=${id}`)}`,
+      );
       return;
     }
 
@@ -122,9 +130,8 @@ const SalonDetail = () => {
                 src={salon.displayImage}
                 alt={salon.name}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src = "https://placehold.co/800x400?text=No+Image";
-                }}
+                referrerPolicy="no-referrer"
+                onError={handleSalonImageError}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
@@ -232,10 +239,10 @@ const SalonDetail = () => {
                             </div>
                             <div className="text-right ml-4">
                               <p className="font-bold text-blue-600">
-                                {service.price} €
+                                {service.price} MAD
                               </p>
                               <p className="text-sm text-gray-500">
-                                {service.duration} min
+                                {service.durationMinutes || service.duration} min
                               </p>
                             </div>
                           </div>

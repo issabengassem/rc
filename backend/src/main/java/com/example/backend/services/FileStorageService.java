@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +14,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class FileStorageService {
 
     private final Path fileStorageLocation;
@@ -37,7 +39,11 @@ public class FileStorageService {
     public String storeFile(MultipartFile file) {
         // Use Cloudinary if enabled
         if (cloudinaryEnabled && cloudinaryService != null) {
-            return cloudinaryService.uploadFile(file, "salons");
+            try {
+                return cloudinaryService.uploadFile(file, "salons");
+            } catch (RuntimeException ex) {
+                log.warn("Cloudinary upload failed. Falling back to local salon image storage: {}", ex.getMessage());
+            }
         }
         
         // Otherwise use local storage

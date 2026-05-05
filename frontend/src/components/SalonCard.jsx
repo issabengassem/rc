@@ -1,7 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Star, Phone, Clock } from "lucide-react";
+import { MapPin, Star, Phone } from "lucide-react";
 import { useToast } from "../contexts/ToastContext";
+import { salonService } from "../services/apiService";
+import {
+  handleSalonImageError,
+  SALON_IMAGE_FALLBACK,
+} from "../utils/imageUtils";
 
 const SalonCard = ({ salon }) => {
   const navigate = useNavigate();
@@ -10,7 +15,7 @@ const SalonCard = ({ salon }) => {
   const getImageUrl = () => {
     // External image URL (from Apify/Google)
     if (salon.image_url) {
-      return salon.image_url;
+      return salonService.getImageUrl(salon.image_url);
     }
 
     // Image stored as Binary (Blob) in database
@@ -23,18 +28,15 @@ const SalonCard = ({ salon }) => {
 
     // Display image if provided (already processed URL)
     if (salon.displayImage) {
-      return salon.displayImage;
+      return salonService.getImageUrl(salon.displayImage);
     }
 
-    // Backend image path - construct URL
+    // Backend image path - construct URL or return as-is if already a full URL
     if (salon.imagePath) {
-      const imageUrl = `http://localhost:8080/api/files/salons/${salon.imagePath}`;
-      console.log("Image URL for salon", salon.name, ":", imageUrl);
-      return imageUrl;
+      return salonService.getImageUrl(salon.imagePath);
     }
 
-    // Default placeholder
-    return "https://placehold.co/400x300?text=No+Image";
+    return SALON_IMAGE_FALLBACK;
   };
 
   const handleBookNow = () => {
@@ -115,18 +117,7 @@ const SalonCard = ({ salon }) => {
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           loading="lazy"
           referrerPolicy="no-referrer"
-          crossOrigin="anonymous"
-          onError={(e) => {
-            console.error(
-              "Failed to load image for salon:",
-              salon.name,
-              "URL:",
-              e.target.src,
-            );
-            e.target.onerror = null; // Prevent infinite loop
-            e.target.src =
-              "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=400&fit=crop";
-          }}
+          onError={handleSalonImageError}
         />
       </div>
 

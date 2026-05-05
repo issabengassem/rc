@@ -8,6 +8,10 @@ import {
 } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
 import SalonFilterPanel from "../components/SalonFilterPanel";
+import {
+  handleSalonImageError,
+  SALON_IMAGE_FALLBACK,
+} from "../utils/imageUtils";
 
 /**
  * Salons Page with Advanced Filtering
@@ -38,9 +42,14 @@ const Salons = () => {
       // Fetch all salons
       const salonsData = await salonService.getAllSalons();
 
-      // Fetch all services for filter dropdown
-      const servicesData = await serviceService.getAllServices();
-      setAllServices(servicesData);
+      // Fetch all services for filter dropdown. Salons should still render if this helper request fails.
+      try {
+        const servicesData = await serviceService.getAllServices();
+        setAllServices(servicesData);
+      } catch (serviceError) {
+        console.warn("Could not load service filters:", serviceError);
+        setAllServices([]);
+      }
 
       // Enhance salons with ratings and images
       const enhancedSalons = await enhanceSalonsWithRatings(salonsData);
@@ -63,22 +72,19 @@ const Salons = () => {
   const enhanceSalonsWithRatings = async (salonsData) => {
     return Promise.all(
       salonsData.map(async (salon) => {
+        const displayImage = salonService.getImageUrl(salon.imagePath);
         try {
           const stats = await reviewService.getSalonRatingStats(salon.id);
           return {
             ...salon,
-            displayImage: salon.imagePath
-              ? salonService.getImageUrl(salon.imagePath)
-              : "https://placehold.co/400x300?text=No+Image",
+            displayImage,
             averageRating: stats.averageRating || 0,
             totalReviews: stats.totalReviews || 0,
           };
         } catch (error) {
           return {
             ...salon,
-            displayImage: salon.imagePath
-              ? salonService.getImageUrl(salon.imagePath)
-              : "https://placehold.co/400x300?text=No+Image",
+            displayImage,
             averageRating: 0,
             totalReviews: 0,
           };
@@ -152,6 +158,33 @@ const Salons = () => {
     } else {
       navigate(`/salon/${salonId}`);
     }
+  };
+
+  const getSalonCardImageSrc = (salon) => {
+    const rawImagePath =
+      typeof salon.imagePath === "string" ? salon.imagePath.trim() : "";
+
+    if (/^https?:\/\//i.test(rawImagePath)) {
+      return rawImagePath;
+    }
+
+    return salon.displayImage || SALON_IMAGE_FALLBACK;
+  };
+
+  const handleSalonCardImageError = (event, salon) => {
+    const image = event.currentTarget;
+
+    if (
+      image.dataset.proxyTried !== "true" &&
+      salon.displayImage &&
+      image.src !== salon.displayImage
+    ) {
+      image.dataset.proxyTried = "true";
+      image.src = salon.displayImage;
+      return;
+    }
+
+    handleSalonImageError(event);
   };
 
   // Render star rating
@@ -270,11 +303,15 @@ const Salons = () => {
                     onClick={() => handleViewSalon(salon.id)}
                   >
                     {/* Image */}
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-48 overflow-hidden bg-gray-100">
                       <img
-                        src={salon.displayImage}
+                        src={getSalonCardImageSrc(salon)}
                         alt={salon.name}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                        referrerPolicy="no-referrer"
+                        onError={(event) =>
+                          handleSalonCardImageError(event, salon)
+                        }
                       />
                       {salon.averageRating > 0 && (
                         <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
