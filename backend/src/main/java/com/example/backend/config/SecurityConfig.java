@@ -14,8 +14,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,6 +36,10 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
     @Autowired
     private JwtFilter jwtFilter;
+    @Autowired
+    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Value("${allowed.origins}")
     private String allowedOrigins;
@@ -67,7 +74,7 @@ public class SecurityConfig {
     public AuthenticationProvider authProvider() {
         // DAO = accès aux données (User en DB)
         DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider(userDetailsService);
-        daoProvider.setPasswordEncoder(passwordEncoder());
+        daoProvider.setPasswordEncoder(passwordEncoder);
         return daoProvider;
     }
 
@@ -81,12 +88,16 @@ public class SecurityConfig {
                         auth
                                 // Public endpoints - no authentication required
                                 .requestMatchers(
+                                        "/",
+                                        "/error",
                                         "/api/health",
                                         "/api/auth/**",
                                         "/api/users/register", 
                                         "/api/users/login",
                                         "/api/users/verify-email",
-                                        "/api/users/resend-code"
+                                        "/api/users/resend-code",
+                                        "/login/oauth2/code/**",
+                                        "/oauth2/**"
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.GET,
                                         "/api/files/**",
@@ -101,6 +112,19 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2Login(oauth2 -> oauth2
+                    .userInfoEndpoint(userInfo -> userInfo
+                        .userService(oauth2UserService()))
+                    .successHandler(oAuth2LoginSuccessHandler)
+                    .failureHandler((request, response, exception) -> {
+                        String frontend = "http://localhost:3000";
+                        try {
+                            String envFront = System.getenv("FRONTEND_URL");
+                            if (envFront != null && !envFront.isBlank()) frontend = envFront;
+                        } catch (Exception ignored) {}
+                        response.sendRedirect(frontend + "/login?error=google_auth_failed&msg=" + java.net.URLEncoder.encode(exception.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
+                    })
+                )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -113,7 +137,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
+    public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+        DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+        return userRequest -> {
+            OAuth2User user = delegate.loadUser(userRequest);
+            // Here you would typically find or create the user in your database
+            // For now, return the user with Google attributes
+            return user;
+        };
     }
 }

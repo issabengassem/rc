@@ -64,6 +64,19 @@ public class UserController {
         }
     }
 
+    @GetMapping("/oauth-callback")
+    public ResponseEntity<?> googleOAuthCallback(@RequestParam(required = false) String code,
+                                               @RequestParam(required = false) String state) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
+                .body(
+                        ErrorResponseDto.builder()
+                                .status(501)
+                                .error("GOOGLE_LOGIN_NOT_IMPLEMENTED")
+                                .message("Google OAuth is currently not configured. Please use email/password login.")
+                                .build()
+                );
+    }
+
     // DELETED: Email Verification Endpoints - Email verification system removed
 
     @PutMapping("/{id}")

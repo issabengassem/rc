@@ -30,6 +30,7 @@ import TestConnection from "./pages/TestConnection";
 import UserProfile from "./pages/UserProfile";
 import BookAppointment from "./pages/BookAppointment";
 import BackendTest from "./pages/BackendTest";
+import OAuthCallback from "./pages/OAuthCallback";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/home" element={<Home />} /> {/* FIXED: Moved original home page to /home for backward compatibility */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/oauth2/callback" element={<OAuthCallback />} />
           {/* DELETED: <Route path="/verify-email" element={<VerifyEmail />} /> - email verification system removed */}
 
           {/* Protected Pages - Authentication Required */}

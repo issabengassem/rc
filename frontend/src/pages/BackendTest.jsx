@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { salonService, appointmentService } from "../services/apiService";
+import {
+  salonService,
+  getApiBaseUrl,
+} from "../services/apiService";
 
 /**
  * Backend Connection Test Component
@@ -30,16 +33,13 @@ function BackendTest() {
       // Test 1: Check if backend is reachable
       addResult("Connection Test", null, "Testing backend connection...");
       try {
-        // FIXED: Use configurable API URL for local development vs production
-        const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://localhost:8080/api'
-          : 'https://rc-production-3ae4.up.railway.app/api';
+        const baseUrl = getApiBaseUrl();
         const response = await fetch(`${baseUrl}/salons`);
         if (response.ok) {
           addResult(
             "Connection Test",
             true,
-            "✅ Backend is reachable", // FIXED: Removed hardcoded localhost reference
+            "✅ Backend is reachable",
           );
         } else {
           addResult(
@@ -207,14 +207,14 @@ function BackendTest() {
               <li>
                 <strong>❌ Cannot connect to backend:</strong>
                 <br />
-                → Make sure your Spring Boot backend is running on
-                http://rc-production-3ae4.up.railway.app {/* FIXED: Changed to production URL */}
+                → Make sure your Spring Boot backend is running and the `/api`
+                proxy is reachable
                 <br />→ Check terminal for backend errors
               </li>
               <li>
                 <strong>❌ CORS Error:</strong>
                 <br />→ Ensure your backend has CORS configured to allow
-                http://localhost:3000
+                your frontend origin
               </li>
               <li>
                 <strong>❌ 404 Not Found:</strong>

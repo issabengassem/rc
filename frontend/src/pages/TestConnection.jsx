@@ -4,6 +4,7 @@ import {
   userService,
   appointmentService,
   serviceService,
+  getApiBaseUrl,
 } from "../services/apiService";
 
 const TestConnection = () => {
@@ -31,10 +32,7 @@ const TestConnection = () => {
     setTesting(true);
     setResults({});
 
-    // FIXED: Use configurable API URL for local development vs production
-    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:8080/api'
-      : 'https://rc-production-3ae4.up.railway.app/api';
+    const baseUrl = getApiBaseUrl();
 
     // Test backend connection
     await testEndpoint("Backend Connection", async () => {

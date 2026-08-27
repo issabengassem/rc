@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { authService } from "../services/apiService";
 import { AlertCircle } from "lucide-react";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -193,6 +194,27 @@ const Login = () => {
                     "Se connecter"
                   )}
                 </button>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs text-gray-400">ou</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Google Login */}
+                <GoogleLoginButton
+                  onSuccess={(data) => {
+                    const redirectTo = searchParams.get("redirect");
+                    if (redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")) {
+                      navigate(redirectTo);
+                      return;
+                    }
+                    if (data.user.role === "OWNER") navigate("/mes-salons");
+                    else navigate("/salons");
+                  }}
+                  onError={(msg) => setError(msg)}
+                />
               </div>
             </form>
 

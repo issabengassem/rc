@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { userService } from "../services/apiService";
 import { useToast } from "../contexts/ToastContext";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -289,6 +290,26 @@ const Register = () => {
                 >
                   {loading ? "Inscription en cours..." : "S'inscrire"}
                 </button>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs text-gray-400">ou</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Google Sign-Up */}
+                <GoogleLoginButton
+                  text="signup_with"
+                  onSuccess={(data) => {
+                    toast.success(`Bienvenue ${data.user.name} ! Compte Google créé.`);
+                    setTimeout(() => {
+                      if (data.user.role === "OWNER") navigate("/mes-salons");
+                      else navigate("/salons");
+                    }, 800);
+                  }}
+                  onError={(msg) => toast.error(msg)}
+                />
               </div>
             </form>
 

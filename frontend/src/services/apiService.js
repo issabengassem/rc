@@ -2,14 +2,28 @@
 import { resolveImageUrl } from "../utils/imageUtils";
 
 // Base URL for all API calls - FIXED: Made configurable for local development vs production
-const getApiBaseUrl = () => {
-  // FIXED: Check if running on localhost for development
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return "http://localhost:8080/api"; // Local development backend
+const isLocalDevelopment = () =>
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname === "0.0.0.0";
+
+export const getBackendBaseUrl = () => {
+  // 1) Explicit env var takes priority (for DigitalOcean / production)
+  const envUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_API_URL;
+  if (envUrl) {
+    return envUrl.replace(/\/$/, "");
   }
-  // Production backend
-  return "https://rc-production-3ae4.up.railway.app/api";
+  // 2) Local development
+  if (isLocalDevelopment()) {
+    // Use same hostname as frontend but backend port 8080 to avoid CORS mismatch
+    return `http://${window.location.hostname}:8080`;
+  }
+  // 3) Production on same host (e.g. DigitalOcean single service or proxy)
+  // If frontend and backend share same DigitalOcean App, use relative path
+  return "";
 };
+
+export const getApiBaseUrl = () => `${getBackendBaseUrl()}/api`;
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -158,7 +172,22 @@ export const authService = {
     return localStorage.getItem("accessToken");
   },
 
-  // DELETED: Email verification API methods (verifyEmail, resendVerificationCode) - email verification system removed
+  // Google OAuth - redirect to backend authorization endpoint
+  getGoogleAuthUrl: () => `${getBackendBaseUrl()}/oauth2/authorization/google`,
+
+  // Google ID token login (GIS)
+  googleIdTokenLogin: async (idToken) => {
+    const response = await fetch(`${API_BASE_URL}/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: "Échec Google login" }));
+      throw new Error(err.error || err.message || "Échec Google login");
+    }
+    return response.json();
+  },
 };
 
 // ==================== USER ENDPOINTS ====================
@@ -419,9 +448,7 @@ export const salonService = {
 
   // Get image URL
   getImageUrl: (imagePath) => {
-    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:8080'
-      : 'https://rc-production-3ae4.up.railway.app';
+    const baseUrl = getBackendBaseUrl();
 
     const buildExternalImageProxyUrl = (url) =>
       `${baseUrl}/api/files/external-image?url=${encodeURIComponent(url)}`;

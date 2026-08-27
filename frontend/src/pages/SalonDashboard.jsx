@@ -88,7 +88,7 @@ const SalonDashboard = () => {
         err.message.includes("NetworkError")
       ) {
         errorMessage =
-          "❌ Impossible de contacter le serveur. Veuillez réessayer plus tard."; // FIXED: Removed hardcoded localhost URL from error message
+          "❌ Impossible de contacter le serveur. Veuillez réessayer plus tard.";
       } else if (err.message.includes("404")) {
         errorMessage = `❌ Salon #${id} introuvable. Le salon a peut-être été supprimé.`;
       } else if (err.message.includes("401") || err.message.includes("403")) {

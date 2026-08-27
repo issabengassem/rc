@@ -51,7 +51,7 @@ const UserProfile = () => {
       // Check if it's a network/CORS error
       if (error.message === "Failed to fetch") {
         toast.error(
-          "Impossible de se connecter au serveur. Veuillez vérifier votre connexion.", // FIXED: Removed hardcoded localhost URL
+          "Impossible de se connecter au serveur. Veuillez vérifier votre connexion.",
         );
       } else if (error.message.includes("Session expirée")) {
         // Token expired - handleResponse will redirect to login

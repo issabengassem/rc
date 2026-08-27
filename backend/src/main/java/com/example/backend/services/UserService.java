@@ -151,6 +151,43 @@ public class UserService {
         user.setRole(dto.getRole());
         return user;
     }
+
+    /**
+     * Google OAuth: Find existing user or create new one.
+     * Called from OAuth2LoginSuccessHandler after Google authenticates the user.
+     */
+    public User processOAuthUser(String email, String name, String googleId) {
+        User existing = userRepository.findByEmailIgnoreCase(email);
+        if (existing != null) {
+            return existing;
+        }
+        // Create new user from Google info
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setName(name != null ? name : email.split("@")[0]);
+        // Random secure password for OAuth users (they will login via Google)
+        newUser.setPassword(passwordEncoder.encode("OAUTH_" + System.currentTimeMillis() + "_" + new Random().nextInt(999999)));
+        newUser.setPhone(null); // phone optional for OAuth users
+        newUser.setRole(User.UserRole.CLIENT);
+        newUser.setEmailVerified(true);
+        return userRepository.save(newUser);
+    }
+
+    public AuthResponseDto createOAuthResponse(User user) {
+        String token = jwtService.generateToken(user.getEmail(), user.getRole());
+        UserDTO dto = UserDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : LocalDateTime.now().toString())
+                .role(user.getRole())
+                .build();
+        return AuthResponseDto.builder()
+                .accessToken(token)
+                .user(dto)
+                .build();
+    }
     
     // DELETED: Email verification methods (verifyEmail, resendVerificationCode, generateVerificationCode) - email verification system removed
 }

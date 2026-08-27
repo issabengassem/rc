@@ -128,7 +128,7 @@ function SalonEdit() {
         error.message.includes("NetworkError")
       ) {
         errorMessage =
-          "❌ Impossible de contacter le serveur. Veuillez vérifier votre connexion et réessayer."; // FIXED: Removed hardcoded localhost URL
+          "❌ Impossible de contacter le serveur. Veuillez vérifier votre connexion et réessayer.";
       } else if (error.message.includes("404")) {
         errorMessage = `❌ Salon #${id} introuvable.\n\nLe salon a peut-être été supprimé.`;
       } else if (

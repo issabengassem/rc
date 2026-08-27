@@ -30,15 +30,19 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Skip JWT filter for public endpoints that should work even with stale localStorage tokens.
         return path.startsWith("/api/health") ||
-               path.startsWith("/api/auth/") ||
-               path.startsWith("/api/users/register") ||
-               path.startsWith("/api/users/login") ||
-               path.startsWith("/api/users/verify-email") ||
-               path.startsWith("/api/users/resend-code") ||
-               (isGet && path.startsWith("/api/files/")) ||
-               (isGet && (path.equals("/api/salons") || path.startsWith("/api/salons/"))) ||
-               (isGet && (path.equals("/api/services") || path.startsWith("/api/services/"))) ||
-               (isGet && path.startsWith("/api/reviews/salon/"));
+                path.startsWith("/api/auth/") ||
+                path.startsWith("/api/users/register") ||
+                path.startsWith("/api/users/login") ||
+                path.startsWith("/api/users/verify-email") ||
+                path.startsWith("/api/users/resend-code") ||
+                path.startsWith("/oauth2/") ||
+                path.startsWith("/login/oauth2/") ||
+                path.equals("/") ||
+                path.equals("/error") ||
+                (isGet && path.startsWith("/api/files/")) ||
+                (isGet && (path.equals("/api/salons") || path.startsWith("/api/salons/"))) ||
+                (isGet && (path.equals("/api/services") || path.startsWith("/api/services/"))) ||
+                (isGet && path.startsWith("/api/reviews/salon/"));
     }
 
     @Override
