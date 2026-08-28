@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getBackendBaseUrl, getApiBaseUrl } from "../services/apiService";
 
-const GOOGLE_CLIENT_ID = "553267498033-e0j2h01ouk14hp43mbg7bt248i162ns3.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "553267498033-e0j2h01ouk14hp43mbg7bt248i162ns3.apps.googleusercontent.com";
 
 const GoogleLoginButton = ({ onSuccess, onError, text = "signin_with" }) => {
   const gisDivRef = useRef(null);

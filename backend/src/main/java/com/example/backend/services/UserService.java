@@ -167,7 +167,7 @@ public class UserService {
         newUser.setName(name != null ? name : email.split("@")[0]);
         // Random secure password for OAuth users (they will login via Google)
         newUser.setPassword(passwordEncoder.encode("OAUTH_" + System.currentTimeMillis() + "_" + new Random().nextInt(999999)));
-        newUser.setPhone(null); // phone optional for OAuth users
+        newUser.setPhone("0000000000"); // default phone for OAuth users to satisfy DB NOT NULL
         newUser.setRole(User.UserRole.CLIENT);
         newUser.setEmailVerified(true);
         return userRepository.save(newUser);

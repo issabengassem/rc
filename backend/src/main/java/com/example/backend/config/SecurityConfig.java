@@ -50,7 +50,10 @@ public class SecurityConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
         // Allow requests from React frontend (read from environment variable)
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
         corsConfig.setAllowedOrigins(origins);
 
         // Allow all HTTP methods your frontend uses

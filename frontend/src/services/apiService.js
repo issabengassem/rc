@@ -2,10 +2,14 @@
 import { resolveImageUrl } from "../utils/imageUtils";
 
 // Base URL for all API calls - FIXED: Made configurable for local development vs production
-const isLocalDevelopment = () =>
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1" ||
-  window.location.hostname === "0.0.0.0";
+const isLocalDevelopment = () => {
+  if (typeof window === "undefined" || !window.location) return false;
+  return (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "0.0.0.0"
+  );
+};
 
 export const getBackendBaseUrl = () => {
   // 1) Explicit env var takes priority (for DigitalOcean / production)
@@ -15,11 +19,10 @@ export const getBackendBaseUrl = () => {
   }
   // 2) Local development
   if (isLocalDevelopment()) {
-    // Use same hostname as frontend but backend port 8080 to avoid CORS mismatch
-    return `http://${window.location.hostname}:8080`;
+    const protocol = window.location.protocol || "http:";
+    return `${protocol}//${window.location.hostname}:8080`;
   }
   // 3) Production on same host (e.g. DigitalOcean single service or proxy)
-  // If frontend and backend share same DigitalOcean App, use relative path
   return "";
 };
 
@@ -158,8 +161,15 @@ export const authService = {
 
   // Get current user from localStorage
   getCurrentUser: () => {
-    const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+    try {
+      const userStr = localStorage.getItem("user");
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (e) {
+      console.warn("Corrupted user in localStorage, clearing");
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      return null;
+    }
   },
 
   // Check if user is authenticated
